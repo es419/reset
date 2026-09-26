@@ -294,22 +294,34 @@ function adaptiveActionAllowed(a,s){
  if(a.requires==='alone'&&c.alone!==true)return false;
  return true;
 }
+function personalActionStats(actionId,session){
+ const rows=(state.interventions||[]).filter(x=>x.status==='completed'&&x.actionId===actionId&&Number.isFinite(+x.before)&&Number.isFinite(+x.after));
+ const sameTrigger=rows.filter(x=>x.trigger===session.trigger);
+ const sameFeeling=rows.filter(x=>x.context?.feeling&&x.context.feeling===session.context?.feeling);
+ const pool=sameTrigger.length?sameTrigger:sameFeeling.length?sameFeeling:rows;
+ if(!pool.length)return {uses:0,avgDrop:0};
+ return {uses:pool.length,avgDrop:pool.reduce((sum,x)=>sum+((+x.before)-(+x.after)),0)/pool.length};
+}
 function actionScore(a,s){
  const c=s.context||{};
  let score=a.weight||0;
  if(a.triggers?.includes(s.trigger))score+=8;
  if(a.feelings?.includes(c.feeling))score+=6;
  if(a.activities?.includes(c.activity))score+=8;
- if((s.intensity||0)>=8&&a.highIntensity)score+=15;
- if((s.intensity||0)>=8&&['breath-90','micro-workout','outside-walk','shared-space','phone-lock','leave-room'].includes(a.id))score+=4;
- if(c.activity==='מיטה'&&a.id==='bed-exit')score+=12;
- if(c.activity==='גלילה'&&a.id==='phone-lock')score+=12;
- if(c.alone===true&&['shared-space','message-someone','call-someone'].includes(a.id))score+=6;
- if(['טלפון','תוכן ברשת'].includes(s.trigger)&&a.id==='phone-lock')score+=8;
- if(c.resources?.includes('lego-near')&&a.id==='lego-build')score+=14;
- if(c.resources?.includes('lego-away')&&a.id==='lego-fetch')score+=14;
+ if((s.intensity||0)>=8&&a.highIntensity)score+=18;
+ if((s.intensity||0)>=8&&['breath-90','micro-workout','outside-walk','shared-space','phone-lock','leave-room','shield-now'].includes(a.id))score+=6;
+ if(c.activity==='מיטה'&&a.id==='bed-exit')score+=14;
+ if(c.activity==='גלילה'&&a.id==='phone-lock')score+=14;
+ if(c.alone===true&&['shared-space','message-someone','call-someone'].includes(a.id))score+=7;
+ if(['טלפון','תוכן ברשת'].includes(s.trigger)&&a.id==='phone-lock')score+=10;
+ if(c.resources?.includes('lego-near')&&a.id==='lego-build')score+=16;
+ if(c.resources?.includes('lego-away')&&a.id==='lego-fetch')score+=16;
  if(c.feeling==='חרד'&&a.id==='breath-90')score+=8;
  if(c.feeling==='כועס/מתוסכל'&&a.id==='micro-workout')score+=8;
+ if(s.mode==='early'&&['small-task','lego-build','lego-fetch','study-sprint','music-task','outside-walk'].includes(a.id))score+=5;
+ const learned=personalActionStats(a.id,s);
+ if(learned.uses){score+=Math.max(-8,Math.min(18,learned.avgDrop*4))+Math.min(5,learned.uses);}
+ if((s.triedActions||[]).includes(a.id))score-=30;
  return score;
 }
 function allActionsFor(session){
@@ -694,11 +706,11 @@ function bindSheet(type){
 }
 
 function startAdaptiveUrgeFlow(){
- urgeDraft={intensity:6,trigger:null,context:{feeling:null,activity:null,location:null,alone:null,canLeave:null,resources:[]}};
- renderAdaptiveUrgeStep('intensity');
+ urgeDraft={mode:null,intensity:6,trigger:null,context:{feeling:null,activity:null,location:null,alone:null,canLeave:null,resources:[]}};
+ renderAdaptiveUrgeStep('mode');
 }
 function flowDots(step){
- const steps=['intensity','trigger','feeling','activity','location','alone','resources'];
+ const steps=['mode','intensity','trigger','feeling','activity','location','alone','resources'];
  const idx=steps.indexOf(step);
  return `<div class="flow-dots">${steps.map((_,i)=>`<i class="${i<=idx?'on':''}"></i>`).join('')}</div>`;
 }
@@ -706,16 +718,21 @@ function renderAdaptiveUrgeStep(step){
  const s=$('#sheet');if(!s)return;
  const d=urgeDraft||(urgeDraft={intensity:6,trigger:null,context:{feeling:null,activity:null,location:null,alone:null,canLeave:null,resources:[]}});
  const head=(title,sub)=>`<div class="coach-head adaptive-head">${flowDots(step)}<h2>${title}</h2><p class="sub">${sub}</p></div>`;
+ if(step==='mode'){
+  s.innerHTML=`<div class="sheet-grab"></div>${head('מה קורה עכשיו?','נבחר מסלול קצר שמתאים לרגע — בלי שאלון ארוך אם לא צריך.')}<div class="smart-entry-grid"><button class="smart-entry" data-mode="urge"><span>${icon('bolt')}</span><b>יש לי דחף עכשיו</b><small>הדחף כבר מורגש ואני רוצה לעצור אותו.</small></button><button class="smart-entry" data-mode="early"><span>${icon('spark')}</span><b>אני מתחיל להחליק</b><small>עוד לא חזק, אבל אני מזהה את הכיוון ורוצה לעצור מוקדם.</small></button></div><button class="coach-link" id="cancelIntervention">לא עכשיו</button>`;
+  $$('[data-mode]').forEach(b=>b.onclick=()=>{d.mode=b.dataset.mode;d.intensity=d.mode==='early'?4:7;haptic(8);renderAdaptiveUrgeStep('intensity')});
+  $('#cancelIntervention').onclick=()=>closeSheet();
+ }
  if(step==='intensity'){
   s.innerHTML=`<div class="sheet-grab"></div>${head(state.discreet?'כמה חזק זה עכשיו?':'כמה חזק הדחף עכשיו?','נשתמש בעוצמה כדי לבחור צעד שמתאים לרגע הזה.')}<div class="urge-meter"><strong id="adaptiveIntensity">${d.intensity}/10</strong><span id="adaptiveIntensityWord">${d.intensity>=8?'חזק':d.intensity>=5?'בינוני':'קל'}</span></div><input class="adaptive-range" id="adaptiveRange" type="range" min="1" max="10" value="${d.intensity}"><div class="intensity-pills"><button data-intensity="3">קל</button><button data-intensity="6">בינוני</button><button data-intensity="9">חזק</button></div><button class="primary-btn" id="adaptiveNext">המשך</button>`;
   $('#adaptiveRange').oninput=e=>{d.intensity=+e.target.value;$('#adaptiveIntensity').textContent=`${d.intensity}/10`;$('#adaptiveIntensityWord').textContent=d.intensity>=8?'חזק':d.intensity>=5?'בינוני':'קל'};
   $$('[data-intensity]').forEach(b=>b.onclick=()=>{$('#adaptiveRange').value=b.dataset.intensity;$('#adaptiveRange').dispatchEvent(new Event('input'));haptic(6)});
-  $('#adaptiveNext').onclick=()=>renderAdaptiveUrgeStep('trigger');
+  $('#adaptiveNext').onclick=()=>{if(d.intensity>=9&&d.mode!=='early'){d.trigger='הרגל אוטומטי';d.context.activity='ישיבה לבד';d.context.alone=true;d.context.canLeave=true;d.context.resources=['water','breathing'];startTriggerIntervention(d.trigger,d.intensity,d.context,d.mode);urgeDraft=null;}else renderAdaptiveUrgeStep('trigger')};
  }
  if(step==='trigger'){
   s.innerHTML=`<div class="sheet-grab"></div>${head('מה הצית את הדחף?','בחר את הדבר שהכי קרוב למה שקורה עכשיו.')}<div class="adaptive-grid">${triggerLabels.map(x=>`<button class="adaptive-choice ${d.trigger===x?'selected':''}" data-trigger="${x}">${x}</button>`).join('')}</div><button class="primary-btn" id="adaptiveNext" ${d.trigger?'':'disabled'}>המשך</button><button class="coach-link" id="adaptiveBack">חזרה</button>`;
   $$('[data-trigger]').forEach(b=>b.onclick=()=>{d.trigger=b.dataset.trigger;$$('[data-trigger]').forEach(x=>x.classList.toggle('selected',x===b));$('#adaptiveNext').disabled=false;haptic(6)});
-  $('#adaptiveNext').onclick=()=>renderAdaptiveUrgeStep('feeling');$('#adaptiveBack').onclick=()=>renderAdaptiveUrgeStep('intensity');
+  $('#adaptiveNext').onclick=()=>{if(d.mode==='early')renderAdaptiveUrgeStep('location');else renderAdaptiveUrgeStep('feeling')};$('#adaptiveBack').onclick=()=>renderAdaptiveUrgeStep('intensity');
  }
  if(step==='feeling'){
   s.innerHTML=`<div class="sheet-grab"></div>${head('מה אתה מרגיש עכשיו?','הרגש משנה מאוד איזה סוג פעולה יעזור יותר.')}<div class="adaptive-grid">${feelingLabels.map(x=>`<button class="adaptive-choice ${d.context.feeling===x?'selected':''}" data-feeling="${x}">${x}</button>`).join('')}</div><button class="primary-btn" id="adaptiveNext" ${d.context.feeling?'':'disabled'}>המשך</button><button class="coach-link" id="adaptiveBack">חזרה</button>`;
@@ -754,36 +771,44 @@ function renderAdaptiveUrgeStep(step){
 }
 function finishAdaptiveUrgeFlow(){
  const d=urgeDraft;if(!d?.trigger)return;
- startTriggerIntervention(d.trigger,d.intensity,d.context);
+ startTriggerIntervention(d.trigger,d.intensity,d.context,d.mode||'urge');
  urgeDraft=null;
 }
-function startTriggerIntervention(trigger,intensity,context={}){
+function startTriggerIntervention(trigger,intensity,context={},mode='urge'){
   const id=`int-${Date.now().toString(36)}`;
   const now=new Date().toISOString();
   state.interventions=state.interventions||[];
-  state.interventions.push({id,date:now,trigger,intensity,before:intensity,after:null,status:'choosing',context:{...context},unavailableActions:[],suggestionOffset:0,actionId:null,actionTitle:null,startedAt:null,completedAt:null,stepsDone:[]});
-  state.urges.push({date:now,trigger,intensity,context:{...context},outcome:'intervention-started',interventionId:id});
-  save();haptic(12);renderActionPicker(id);
+  const session={id,date:now,mode,trigger,intensity,before:intensity,after:null,status:'choosing',context:{...context},unavailableActions:[],suggestionOffset:0,triedActions:[],actionId:null,actionTitle:null,startedAt:null,completedAt:null,stepsDone:[],timeline:[{at:now,type:'started',intensity}]};
+  state.interventions.push(session);
+  state.urges.push({date:now,mode,trigger,intensity,context:{...context},outcome:'intervention-started',interventionId:id});
+  save();haptic(12);
+  renderActionPicker(id);
 }
 function interventionById(id){return (state.interventions||[]).find(x=>x.id===id);}
 function renderActionPicker(id){
   const session=interventionById(id);if(!session)return closeSheet();
   session.status='choosing';save();
-  const plans=recommendedActionsFor(session);
+  const plans=recommendedActionsFor(session), top=plans[0];
   const c=session.context||{};
-  const contextBits=[c.feeling,c.activity,c.location,c.alone===true?'לבד':c.alone===false?'עם אנשים':null,...(c.resources||[]).slice(0,2).map(x=>resourceLabels[x]||x)].filter(Boolean);
-  const s=$('#sheet');s.innerHTML=`<div class="sheet-grab"></div><div class="coach-head adaptive-result-head"><span class="coach-step">הצעות שמתאימות לרגע הזה</span><h2>בחר פעולה אחת</h2><p class="sub">לפי <b>${esc(session.trigger)}</b> · עוצמה ${session.intensity}/10${contextBits.length?' · '+contextBits.map(esc).join(' · '):''}. אם משהו לא אפשרי — מסמנים ומקבלים חלופות.</p></div><div class="action-plan-list">${plans.map((a,i)=>`<div class="adaptive-plan-wrap"><button class="action-plan ${i===0?'recommended':''}" data-plan="${a.id}"><span class="plan-num">${i+1}</span><span><b>${esc(a.title)}</b><small>${esc(a.desc)}</small><em>${Math.max(1,Math.round(a.duration/60))} דק׳ · ${a.steps.length} צעדים</em></span><span class="arrow">‹</span></button><button class="plan-unavailable" data-unavailable="${a.id}">לא אפשרי כרגע</button></div>`).join('')}</div><button class="secondary-btn" id="moreActions">תן לי אפשרויות אחרות</button><button class="secondary-btn" id="noOptionWorks">אף אפשרות לא מתאימה לי</button><button class="coach-link" id="cancelIntervention">לא עכשיו</button>`;
+  const learned=top?personalActionStats(top.id,session):{uses:0,avgDrop:0};
+  const contextBits=[c.feeling,c.activity,c.location,c.alone===true?'לבד':c.alone===false?'עם אנשים':null].filter(Boolean);
+  const why=learned.uses>=2&&learned.avgDrop>0.5?`אצלך הפעולה הזו הורידה בעבר בממוצע ${learned.avgDrop.toFixed(1)} נק׳`:(session.intensity>=8?'עכשיו עדיף צעד שמקטין גישה ומשנה סביבה מהר':'זו ההתאמה הכי טובה למה שסימנת כרגע');
+  const s=$('#sheet');
+  s.innerHTML=`<div class="sheet-grab"></div><div class="coach-head adaptive-result-head"><span class="coach-step">${session.mode==='early'?'מניעה מוקדמת':'הצעד הבא שלך'}</span><h2>עכשיו עושים דבר אחד.</h2><p class="sub">${esc(why)}${contextBits.length?' · '+contextBits.map(esc).join(' · '):''}</p></div>
+  ${top?`<div class="smart-recommend"><div class="smart-recommend-badge">מומלץ עכשיו</div><h3>${esc(top.title)}</h3><p>${esc(top.desc)}</p><div class="smart-steps">${top.steps.slice(0,3).map((x,i)=>`<span><b>${i+1}</b>${esc(x)}</span>`).join('')}</div><button class="primary-btn" id="doRecommended">התחל עכשיו · ${Math.max(1,Math.round(top.duration/60))} דק׳</button></div>`:''}
+  <div class="smart-alt-row"><button class="secondary-btn" id="notPossible">לא אפשרי כרגע</button><button class="secondary-btn" id="showAlternatives">תן חלופה</button></div>
+  <button class="coach-link" id="goSOSFromPicker">אני צריך עצירה מיידית</button><button class="coach-link" id="cancelIntervention">לא עכשיו</button>`;
   enableSheetDrag();
-  $$('.action-plan').forEach(btn=>btn.onclick=()=>beginInterventionAction(id,btn.dataset.plan));
-  $$('[data-unavailable]').forEach(btn=>btn.onclick=()=>{session.unavailableActions=[...new Set([...(session.unavailableActions||[]),btn.dataset.unavailable])];save();haptic(6);renderActionPicker(id)});
-  $('#moreActions').onclick=()=>{session.suggestionOffset=(session.suggestionOffset||0)+3;save();haptic(6);renderActionPicker(id)};
-  $('#noOptionWorks').onclick=()=>{closeSheet(false);setTimeout(openSOS,60)};
-  $('#cancelIntervention').onclick=()=>{session.status='abandoned';save();closeSheet();toast('נשמר. אפשר לחזור ולנסות שוב בכל רגע')};
+  $('#doRecommended')?.addEventListener('click',()=>beginInterventionAction(id,top.id));
+  $('#notPossible')?.addEventListener('click',()=>{if(top)session.unavailableActions=[...new Set([...(session.unavailableActions||[]),top.id])];session.suggestionOffset=0;save();haptic(6);renderActionPicker(id)});
+  $('#showAlternatives')?.addEventListener('click',()=>{session.suggestionOffset=(session.suggestionOffset||0)+1;save();haptic(6);renderActionPicker(id)});
+  $('#goSOSFromPicker').onclick=()=>{session.timeline=session.timeline||[];session.timeline.push({at:new Date().toISOString(),type:'sos'});save();closeSheet(false);setTimeout(openSOS,60)};
+  $('#cancelIntervention').onclick=()=>{session.status='abandoned';session.timeline=session.timeline||[];session.timeline.push({at:new Date().toISOString(),type:'abandoned'});save();closeSheet();toast('נשמר. אפשר לחזור לזה בכל רגע')};
 }
 function beginInterventionAction(id,actionId){
   const session=interventionById(id);if(!session)return;
   const action=actionById(session,actionId);if(!action)return;
-  session.actionId=action.id;session.actionTitle=action.title;session.actionDuration=action.duration;session.steps=action.steps;session.stepsDone=[];session.startedAt=new Date().toISOString();session.status='active';save();haptic([12,20,12]);renderActiveIntervention(id);
+  session.actionId=action.id;session.actionTitle=action.title;session.actionDuration=action.duration;session.steps=action.steps;session.stepsDone=[];session.startedAt=new Date().toISOString();session.status='active';session.triedActions=[...new Set([...(session.triedActions||[]),action.id])];session.timeline=session.timeline||[];session.timeline.push({at:session.startedAt,type:'action-started',actionId:action.id,title:action.title});save();haptic([12,20,12]);renderActiveIntervention(id);
 }
 function renderActiveIntervention(id){
   const session=interventionById(id);if(!session)return closeSheet();
@@ -811,13 +836,13 @@ function renderInterventionReassess(id){
 }
 function finishIntervention(id,after){
   const session=interventionById(id);if(!session)return;
-  session.after=after;session.completedAt=new Date().toISOString();session.status='completed';
+  session.after=after;session.completedAt=new Date().toISOString();session.status='completed';session.timeline=session.timeline||[];session.timeline.push({at:session.completedAt,type:'reassessed',before:session.before,after,actionId:session.actionId});
   const urge=state.urges.find(x=>x.interventionId===id);if(urge){urge.outcome='action-completed';urge.after=after;urge.action=session.actionTitle;}
   save();haptic([15,24,15]);
   const improved=after<session.before;
   const s=$('#sheet');s.innerHTML=`<div class="sheet-grab"></div><div class="coach-result ${after>=7?'needs-more':''}">${icon(after>=7?'wave':'check')}<h2>${after>=7?'הדחף עדיין גבוה — ממשיכים':'יפה. שברת את האוטומט.'}</h2><p>${after>=7?'זה לא אומר שהפעולה נכשלה. פשוט עוברים לשכבת הגנה נוספת.':improved?`ירדת מ־${session.before}/10 ל־${after}/10. זה בדיוק מה שהמעקב אמור ללמד אותך.`:'גם אם המספר לא ירד, ביצעת תגובה חדשה במקום לפעול אוטומטית.'}</p></div>${after>=7?`<button class="primary-btn" id="anotherAction">בחר פעולה נוספת</button><div style="height:9px"></div><button class="secondary-btn" id="goSOS">עבור ל־SOS של 90 שניות</button>`:`<button class="primary-btn" id="doneIntervention">סיום</button>`}`;
   enableSheetDrag();
-  if(after>=7){$('#anotherAction').onclick=()=>{session.status='choosing';save();renderActionPicker(id)};$('#goSOS').onclick=()=>{closeSheet(false);setTimeout(openSOS,60)};}
+  if(after>=7){$('#anotherAction').onclick=()=>{session.before=after;session.intensity=after;session.status='choosing';session.timeline=session.timeline||[];session.timeline.push({at:new Date().toISOString(),type:'escalated',intensity:after});save();renderActionPicker(id)};$('#goSOS').onclick=()=>{session.timeline=session.timeline||[];session.timeline.push({at:new Date().toISOString(),type:'sos'});save();closeSheet(false);setTimeout(openSOS,60)};}
   else{$('#doneIntervention').onclick=()=>{confetti();closeSheet();render();toast('הפעולה הושלמה ונשמרה ✓')}}
 }
 function resumeIntervention(){
