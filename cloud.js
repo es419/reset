@@ -3,7 +3,7 @@
 
   const CONFIG = Object.freeze({
     endpoint: 'https://fra.cloud.appwrite.io/v1',
-    projectId: '6ab7db6c002620a83131',
+    projectId: '6ab7db6c002620a88131',
     databaseId: '6ab7dc680033548fdc4e',
     tableId: '6ab7dc7f0016db4b5a50'
   });
