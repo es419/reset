@@ -39,3 +39,20 @@ py -m http.server 8080
 - v8: כל איפוס נרשם כנפילה/התחלה מחדש עם timestamp מקומי, יום ושעה.
 - v8: מסך סטטיסטיקות נפילות לומד יום בשבוע, שעות חוזרות וטריגר שתועד עד שעתיים לפני האיפוס.
 - v8: אחרי הצטברות נתונים, תובנת סיכון מופיעה גם בדאשבורד והדוח השבועי משתמש בדפוס שנלמד.
+
+
+## AI chat backend
+
+The app includes a dedicated AI chat screen. The frontend calls a Cloudflare Worker at `https://reset-ai.eladshimonn.workers.dev/chat`.
+
+The Worker validates the signed-in Appwrite user with a short-lived JWT and keeps the OpenAI API key on the server.
+
+Deploy:
+
+```bash
+cd ai-worker
+npx wrangler secret put OPENAI_API_KEY
+npx wrangler deploy
+```
+
+If your Workers subdomain differs, update `AI_CHAT_ENDPOINT` in `app.js`.
