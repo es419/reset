@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#07060d" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="פוקוס" />
+  <meta name="format-detection" content="telephone=no" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>פוקוס — מעקב אישי</title>
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+    <header class="topbar">
+      <button class="icon-btn" id="profileBtn" aria-label="פרופיל"><span class="avatar-dot">א</span></button>
+      <div class="brand"><span class="brand-mark">◌</span><span>פוקוס</span></div>
+      <button class="icon-btn" id="themeBtn" aria-label="מצב תצוגה"><span data-top-icon="theme"></span></button>
+    </header>
+
+    <main id="view" class="view" aria-live="polite"></main>
+
+    <button id="sosFloat" class="sos-float" aria-label="עזרה עכשיו"><span>!</span><b>דחף עכשיו</b></button>
+
+    <nav class="bottom-nav" aria-label="ניווט ראשי">
+      <button class="nav-item" data-view="tools"><span class="nav-icon" data-icon="tools"></span><span>כלים</span></button>
+      <button class="nav-item" data-view="stats"><span class="nav-icon" data-icon="stats"></span><span>התקדמות</span></button>
+      <button class="nav-item active" data-view="home"><span class="nav-icon home-orb" data-icon="home"></span><span>בית</span></button>
+      <button class="nav-item" data-view="journey"><span class="nav-icon" data-icon="journey"></span><span>המסע</span></button>
+      <button class="nav-item" data-view="settings"><span class="nav-icon" data-icon="settings"></span><span>הגדרות</span></button>
+    </nav>
+  </div>
+
+  <div id="sheetBackdrop" class="sheet-backdrop hidden"></div>
+  <section id="sheet" class="sheet hidden" role="dialog" aria-modal="true"></section>
+  <div id="toast" class="toast" role="status"></div>
+  <div id="privacyCover" class="privacy-cover" aria-hidden="true"><div class="privacy-logo"><span class="brand-mark">◌</span><b>פוקוס</b><small>מעקב אישי</small></div></div>
+  <div id="confetti" class="confetti-layer" aria-hidden="true"></div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
