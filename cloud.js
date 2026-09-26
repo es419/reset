@@ -77,6 +77,12 @@
     return error?.message || 'הסנכרון נכשל';
   }
 
+  async function ensureSdk() {
+    if (window.Appwrite) return initSdk();
+    try { await window.__focusAppwriteReady; } catch {}
+    return initSdk();
+  }
+
   function initSdk() {
     if (client) return true;
     if (!window.Appwrite) {
@@ -255,7 +261,7 @@
   }
 
   async function refreshUser() {
-    if (!initSdk()) return null;
+    if (!(await ensureSdk())) return null;
     try {
       currentUser = await account.get();
       cloudState.user = currentUser;
@@ -271,7 +277,7 @@
   }
 
   async function login(email, password) {
-    if (!initSdk()) throw new Error('Appwrite SDK לא זמין');
+    if (!(await ensureSdk())) throw new Error('Appwrite SDK לא זמין');
     setCloudStatus('connecting');
     try {
       await account.createEmailPasswordSession({ email: String(email).trim(), password });
@@ -285,7 +291,7 @@
   }
 
   async function register(email, password, name = '') {
-    if (!initSdk()) throw new Error('Appwrite SDK לא זמין');
+    if (!(await ensureSdk())) throw new Error('Appwrite SDK לא זמין');
     setCloudStatus('connecting');
     try {
       await account.create({
@@ -325,7 +331,7 @@
     initialized = true;
     if (typeof getState === 'function') getLocalState = getState;
     if (typeof applyState === 'function') applyLocalState = applyState;
-    if (!initSdk()) return snapshot();
+    if (!(await ensureSdk())) return snapshot();
 
     const meta = readMeta();
     cloudState.lastSyncAt = meta.lastSyncAt || null;
