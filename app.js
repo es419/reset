@@ -204,74 +204,112 @@ const phases=[
  {from:31,to:60,title:'זה כבר שלך',desc:'העמקת ההרגלים וחזרה מהירה אחרי ימים קשים',ico:'spark'},
  {from:61,to:90,title:'חופש',desc:'תחזוקה, זהות חדשה ותוכנית המשך',ico:'journey'}
 ];
-const triggerLabels=['שעמום','מתח','לבד','עייפות','לילה','טלפון','תוכן ברשת','הרגל אוטומטי','חרדה','אחר'];
+const triggerLabels=['שעמום','מתח','בדידות','כעס/תסכול','עייפות','לילה','טלפון','תוכן ברשת','הרגל אוטומטי','חרדה','אחר'];
 const triggerActionPlans={
   'שעמום':[
     {id:'bored-move',title:'שינוי מקום + 5 דקות תנועה',desc:'שוברים את האוטומט דרך הגוף והסביבה.',duration:300,steps:['קום מהמקום שבו אתה נמצא','עבור לחדר אחר או צא החוצה','עשה הליכה קצרה, מתיחות או 20 סקוואטים']},
     {id:'bored-task',title:'משימת 10 דקות',desc:'נותנים למוח יעד קטן ומוגדר במקום גלילה.',duration:600,steps:['בחר משימה אחת קטנה שאפשר לסיים','שים את הטלפון מחוץ להישג יד','עבוד עליה 10 דקות בלי להחליף משימה']},
-    {id:'bored-contact',title:'לצאת מהבועה',desc:'מחליפים בדידות ושעמום בקשר או סביבה פעילה.',duration:180,steps:['קום ועבור למקום שיש בו אנשים','שלח הודעה קצרה למישהו או פתח שיחה','הישאר מחוץ למקום שבו התחיל הדחף לפחות 3 דקות']}
+    {id:'bored-contact',title:'לצאת מהבועה',desc:'מחליפים שעמום בסביבה פעילה או בקשר.',duration:180,steps:['קום ועבור למקום אחר','שלח הודעה קצרה למישהו או פתח שיחה','הישאר מחוץ למקום שבו התחיל הדחף לפחות 3 דקות']}
   ],
   'מתח':[
     {id:'stress-breathe',title:'נשימה + הורדת עוררות',desc:'קודם מרגיעים את הגוף, אחר כך מחליטים.',duration:120,steps:['הנח את שתי הרגליים על הרצפה','בצע 8 נשימות איטיות עם נשיפה ארוכה יותר','שתה כוס מים לפני שאתה ממשיך']},
     {id:'stress-walk',title:'הליכת פריקה קצרה',desc:'מוציאים את המתח מהראש אל הגוף.',duration:300,steps:['קום מיד מהמקום','לך 5 דקות בלי מסך ביד','שים לב ל-3 דברים שאתה רואה ו-3 דברים שאתה שומע']},
-    {id:'stress-write',title:'לפרוק במקום לברוח',desc:'נותנים למתח שם וסיבה במקום לפעול עליו.',duration:180,steps:['כתוב במשפט אחד מה מלחיץ אותך','כתוב מה הדבר הכי קטן שאתה יכול לעשות בנוגע לזה','סגור את המסך ועשה רק את הצעד הקטן הזה']}
+    {id:'stress-write',title:'לפרוק במקום לברוח',desc:'נותנים למתח שם וסיבה במקום לפעול עליו.',duration:180,steps:['כתוב במשפט אחד מה מלחיץ אותך','כתוב מה הדבר הכי קטן שאתה יכול לעשות בנוגע לזה','עשה רק את הצעד הקטן הזה']}
   ],
-  'לבד':[
+  'בדידות':[
     {id:'alone-public',title:'לעבור למרחב משותף',desc:'הסביבה עושה חלק מהעבודה בשבילך.',duration:300,steps:['צא מהחדר או השאר את הדלת פתוחה','עבור לסלון, מטבח, מרפסת או מקום ציבורי','הישאר שם 5 דקות לפחות']},
     {id:'alone-contact',title:'קשר אנושי עכשיו',desc:'לא צריך שיחת עומק — רק לשבור את הבידוד.',duration:180,steps:['בחר אדם אחד שקל לפנות אליו','שלח הודעה, התקשר או פתח שיחה קצרה','אל תחזור למקום הפרטי לפני שהשיחה הסתיימה']},
-    {id:'alone-outside',title:'לצאת החוצה',desc:'שינוי פיזי חד מסיים הרבה לולאות לפני שהן מתחזקות.',duration:300,steps:['לבש נעליים','צא מהבית/בניין או עשה סיבוב קצר','השאר את הטלפון בכיס בזמן ההליכה']}
+    {id:'alone-outside',title:'לצאת החוצה',desc:'שינוי פיזי חד יכול לסיים את הלולאה לפני שהיא מתחזקת.',duration:300,steps:['לבש נעליים','צא מהבית/בניין או עשה סיבוב קצר','השאר את הטלפון בכיס בזמן ההליכה']}
+  ],
+  'כעס/תסכול':[
+    {id:'anger-release',title:'פריקת אנרגיה בטוחה',desc:'מעבירים את העומס לגוף בלי להישאר בלולאה.',duration:300,steps:['קום מהמקום','עשה הליכה מהירה או סט קצר של תרגילים','סיים בדקה של נשימות איטיות']},
+    {id:'anger-cool',title:'מים קרים לפנים + מעבר מקום',desc:'שינוי תחושתי קצר יכול לשבור הצפה.',duration:120,steps:['קום מהמסך','שטוף פנים במים קרירים','עבור למקום אחר לשתי דקות']},
+    {id:'anger-write',title:'לכתוב בלי לשלוח',desc:'מוציאים את התסכול החוצה בלי לפעול באימפולס.',duration:180,steps:['כתוב מה הכעיס אותך','אל תשלח את הטקסט לאף אחד עדיין','בחר פעולה אחת רגועה להמשך']}
   ],
   'לילה':[
     {id:'night-phone',title:'הטלפון מחוץ למיטה',desc:'בלילה עדיף לשנות תנאים במקום להתווכח עם הדחף.',duration:300,steps:['חבר את הטלפון לטעינה הרחק מהמיטה','כבה תוכן/גלילה והדלק אור בחדר','חזור למיטה רק בלי הטלפון ביד']},
     {id:'night-reset',title:'איפוס שגרת שינה',desc:'מחליפים את הלולאה בטקס קצר ומוכר.',duration:300,steps:['קום מהמיטה','שטוף פנים או צחצח שיניים','חזור עם פעילות שקטה שאינה מסך למשך 5 דקות']},
-    {id:'night-room',title:'לצאת מהחדר ל-5 דקות',desc:'אם הדחף התחזק במקום מסוים, אל תישאר איתו שם.',duration:300,steps:['צא מיד מהחדר','שתה מים או עשה מתיחה קצרה','חזור רק כשהדחף ירד לפחות בנקודה אחת']}
+    {id:'night-room',title:'לצאת מהחדר ל-5 דקות',desc:'אם הדחף התחזק במקום מסוים, לא נשארים איתו שם.',duration:300,steps:['צא מיד מהחדר','שתה מים או עשה מתיחה קצרה','חזור רק כשהעוצמה ירדה']}
   ],
   'טלפון':[
     {id:'phone-away',title:'להרחיק את הטלפון',desc:'מוסיפים חיכוך פיזי לפני שהאצבע ממשיכה לבד.',duration:300,steps:['נעל את המסך עכשיו','הנח את הטלפון בחדר אחר או במרחק כמה מטרים','עשה פעילות בלי מסך במשך 5 דקות']},
-    {id:'phone-block',title:'לסגור את המסלול',desc:'לא מסתמכים על כוח רצון כשאפשר לחסום את הדרך.',duration:180,steps:['סגור את האפליקציה/הדפדפן שהפעילו אותך','הפעל חסימה או זמן מסך אם יש לך','פתח רק אפליקציה בטוחה ומוגדרת או הנח את המכשיר בצד']},
-    {id:'phone-hands',title:'להעסיק ידיים וגוף',desc:'שינוי פעולה פיזית עוזר לצאת מהאוטומט.',duration:300,steps:['הנח את הטלפון','קח מים, סדר משהו או התחל משימה ידנית','הישאר בפעילות 5 דקות לפני שאתה בודק שוב את הדחף']}
+    {id:'phone-block',title:'לסגור את המסלול',desc:'לא מסתמכים על כוח רצון כשאפשר לחסום את הדרך.',duration:180,steps:['סגור את האפליקציה/הדפדפן שהפעילו אותך','הפעל חסימה או זמן מסך אם יש לך','הנח את המכשיר בצד']},
+    {id:'phone-hands',title:'להעסיק ידיים וגוף',desc:'שינוי פעולה פיזית עוזר לצאת מהאוטומט.',duration:300,steps:['הנח את הטלפון','קח מים, סדר משהו או התחל משימה ידנית','הישאר בפעילות 5 דקות']}
   ],
   'תוכן ברשת':[
-    {id:'content-close',title:'סגירה מלאה של התוכן',desc:'לא עוד "רק שנייה" — מסיימים את החשיפה.',duration:180,steps:['סגור את הטאב/האפליקציה לחלוטין','נקה את המסך מתוכן דומה או עבור למסך הבית','קום מהמקום למשך 3 דקות']},
-    {id:'content-block',title:'לחסום את המקור',desc:'הופכים את הבחירה הבאה לקלה יותר כבר עכשיו.',duration:180,steps:['העתק/זכור את המקור שהפעיל אותך','חסום אותו בכלי החסימה שבו אתה משתמש','בדוק שהוא לא נפתח מחדש לפני שאתה ממשיך']},
-    {id:'content-switch',title:'מעבר חד לפעילות אחרת',desc:'הבעיה היא לא רק התוכן — אלא להישאר באותה לולאה.',duration:300,steps:['סגור את כל המסכים הקשורים','בחר פעילות אחת שאינה מינית ואינה גלילה','בצע אותה 5 דקות בלי לחזור לבדוק']}
+    {id:'content-close',title:'סגירה מלאה של התוכן',desc:'לא עוד "רק שנייה" — מסיימים את החשיפה.',duration:180,steps:['סגור את הטאב/האפליקציה לחלוטין','עבור למסך הבית','קום מהמקום למשך 3 דקות']},
+    {id:'content-block',title:'לחסום את המקור',desc:'הופכים את הבחירה הבאה לקלה יותר כבר עכשיו.',duration:180,steps:['זהה את המקור שהפעיל אותך','חסום אותו בכלי החסימה שבו אתה משתמש','בדוק שהוא לא נפתח מחדש']},
+    {id:'content-switch',title:'מעבר חד לפעילות אחרת',desc:'לא נשארים באותה לולאת מסך.',duration:300,steps:['סגור את כל המסכים הקשורים','בחר פעילות אחת שאינה גלילה','בצע אותה 5 דקות בלי לחזור לבדוק']}
   ]
 };
+
 const adaptiveActions=[
- {id:'lego-build',title:'לפנות לבנייה של לגו',desc:'להעביר את הידיים והראש למשימה מוחשית שמושכת אותך פנימה.',duration:600,steps:['קח את הסט או החלקים שנמצאים לידך','בחר שלב אחד קטן בלבד','בנה 10 דקות בלי טלפון'],triggers:['שעמום','לבד','מתח','הרגל אוטומטי'],locations:['בית','חדר'],requires:'lego-near',weight:9},
- {id:'lego-fetch',title:'ללכת להביא את הלגו',desc:'אם הוא לא לידך, עצם ההליכה אליו שוברת את הרצף האוטומטי.',duration:600,steps:['קום מהמקום עכשיו','לך למקום שבו הלגו נמצא','בחר שלב קטן ובנה 10 דקות'],triggers:['שעמום','לבד','מתח','הרגל אוטומטי'],locations:['בית','חדר'],requires:'lego-away',weight:10},
- {id:'quick-shower',title:'מקלחת קצרה ואיפוס',desc:'שינוי חד של תחושה וסביבה יכול להוריד את העוררות.',duration:300,steps:['השאר את הטלפון מחוץ לחדר הרחצה','היכנס למקלחת קצרה','צא, התלבש ועבור למקום אחר'],locations:['בית'],weight:5},
- {id:'water-reset',title:'מים + מעבר חדר',desc:'פעולה פשוטה שמוציאה אותך מהנקודה שבה התחילה הלולאה.',duration:180,steps:['קום מיד','שתה כוס מים מלאה','עבור לחדר אחר ל-3 דקות'],weight:6},
- {id:'micro-workout',title:'אימון קצר',desc:'להשתמש באנרגיה של הדחף במקום להילחם בה בראש.',duration:300,steps:['קום מהכיסא/מיטה','עשה 3 סבבים של 10 סקוואטים או שכיבות סמיכה','סיים בדקה של נשימות איטיות'],weight:7},
- {id:'outside-walk',title:'לצאת לסיבוב',desc:'סביבה חדשה מורידה את העוצמה של הרבה טריגרים.',duration:600,steps:['נעל נעליים','צא מהבית או הבניין','לך 10 דקות בלי לגלול'],requires:'can-leave',weight:8},
- {id:'shared-space',title:'לעבור למקום עם אנשים',desc:'אם אתה לבד, שינוי הסביבה עושה חלק מהעבודה בשבילך.',duration:300,steps:['צא מהחדר','עבור למקום משותף או ציבורי','הישאר שם 5 דקות'],requires:'alone',weight:8},
- {id:'music-task',title:'מוזיקה + משימה בידיים',desc:'מחליפים את האוטומט בפעילות מוגדרת ולא פסיבית.',duration:600,steps:['בחר פלייליסט אחד','הנח את הטלפון רחוק אחרי ההפעלה','סדר, נקה או הרכב משהו 10 דקות'],weight:5},
- {id:'study-sprint',title:'ספרינט לימוד של 10 דקות',desc:'יעד קצר וברור נותן למוח משהו אחר להיצמד אליו.',duration:600,steps:['פתח רק חומר אחד','כוון טיימר ל-10 דקות','עשה תרגיל אחד או קרא עמודים ספורים'],triggers:['שעמום','הרגל אוטומטי'],weight:5},
- {id:'message-someone',title:'לשלוח הודעה למישהו',desc:'לא חייבים לדבר על הדחף — רק לצאת מבידוד.',duration:180,steps:['בחר אדם אחד','שלח הודעה פשוטה','אל תחזור למסך/מקום שהפעיל אותך עד שיש שינוי הקשר'],requires:'alone',weight:6},
- {id:'phone-lock',title:'לנעול ולהרחיק את הטלפון',desc:'אם הטלפון חלק מהלולאה, עדיף להסיר אותו פיזית.',duration:300,steps:['נעל את המסך','שים את הטלפון בחדר אחר','בצע פעולה אחרת 5 דקות'],triggers:['טלפון','תוכן ברשת','לילה'],weight:10},
- {id:'bed-exit',title:'לצאת מהמיטה',desc:'אם המיטה הפכה לטריגר, לא נשארים באותה תנוחה וסביבה.',duration:300,steps:['קום מהמיטה','הדלק אור','עבור לחדר אחר ל-5 דקות'],locations:['מיטה'],weight:10},
- {id:'breath-90',title:'90 שניות נשימה',desc:'להוריד את העוררות לפני שבוחרים את הצעד הבא.',duration:90,steps:['הנח רגליים על הרצפה','שאף 4 שניות ונשוף 6 שניות','חזור על זה 9 פעמים'],weight:4},
- {id:'write-two-lines',title:'לכתוב שתי שורות',desc:'לתת שם למה שקורה במקום לברוח ממנו.',duration:180,steps:['כתוב מה אתה מרגיש עכשיו','כתוב מה אתה באמת צריך כרגע','בחר צעד קטן אחד בהתאם'],triggers:['מתח','חרדה','לבד'],weight:6}
+ {id:'shield-now',title:'מיגון מיידי ל-5 דקות',desc:'כשזה חזק מאוד, קודם מורידים גישה ומחליפים סביבה.',duration:300,steps:['קום מהמקום שבו התחיל הדחף','הרחיק את הטלפון או המסך','עבור למקום פתוח/משותף והישאר שם 5 דקות'],weight:15,highIntensity:true},
+ {id:'leave-room',title:'לצאת מהחדר עכשיו',desc:'שינוי מקום חד הוא אחד הקיצורים הכי טובים לשבירת לולאה.',duration:180,steps:['קום בלי להתווכח עם עצמך','צא מהחדר','הישאר במקום אחר 3 דקות'],weight:9,activities:['מיטה','גלילה','ישיבה לבד']},
+ {id:'lego-build',title:'לפנות לבנייה של לגו',desc:'להעביר את הידיים והראש למשימה מוחשית שמושכת אותך פנימה.',duration:600,steps:['קח את הסט או החלקים שנמצאים לידך','בחר שלב אחד קטן בלבד','בנה 10 דקות בלי טלפון'],triggers:['שעמום','בדידות','מתח','הרגל אוטומטי'],requiresResource:'lego-near',weight:11},
+ {id:'lego-fetch',title:'ללכת להביא את הלגו',desc:'אם הוא לא לידך, עצם ההליכה אליו שוברת את הרצף האוטומטי.',duration:600,steps:['קום מהמקום עכשיו','לך למקום שבו הלגו נמצא','בחר שלב קטן ובנה 10 דקות'],triggers:['שעמום','בדידות','מתח','הרגל אוטומטי'],requiresResource:'lego-away',weight:12},
+ {id:'quick-shower',title:'מקלחת קצרה ואיפוס',desc:'שינוי תחושתי וסביבתי יכול להוריד את העוררות.',duration:300,steps:['השאר את הטלפון מחוץ לחדר הרחצה','היכנס למקלחת קצרה','צא, התלבש ועבור למקום אחר'],requiresResource:'shower',weight:7},
+ {id:'cool-face',title:'מים קרירים לפנים',desc:'איפוס קצר בלי להיכנס למקלחת מלאה.',duration:90,steps:['עזוב את המסך','שטוף פנים במים קרירים','קח 6 נשימות איטיות'],requiresResource:'water',weight:6,feelings:['חרדה','כעס/תסכול','מתח']},
+ {id:'water-reset',title:'מים + מעבר חדר',desc:'פעולה פשוטה שמוציאה אותך מהנקודה שבה התחילה הלולאה.',duration:180,steps:['קום מיד','שתה כוס מים מלאה','עבור לחדר אחר ל-3 דקות'],requiresResource:'water',weight:6},
+ {id:'micro-workout',title:'אימון קצר',desc:'להשתמש באנרגיה של הדחף במקום להילחם בה בראש.',duration:300,steps:['קום מהכיסא/מיטה','עשה 3 סבבים של 10 סקוואטים או שכיבות סמיכה','סיים בדקה של נשימות איטיות'],requiresResource:'exercise',weight:8,feelings:['כעס/תסכול','מתח','חוסר שקט']},
+ {id:'outside-walk',title:'לצאת לסיבוב',desc:'סביבה חדשה מורידה את העוצמה של הרבה טריגרים.',duration:600,steps:['נעל נעליים','צא מהבית או הבניין','לך 10 דקות בלי לגלול'],requiresResource:'walk',requires:'can-leave',weight:9},
+ {id:'shared-space',title:'לעבור למקום עם אנשים',desc:'אם אתה לבד, שינוי הסביבה עושה חלק מהעבודה בשבילך.',duration:300,steps:['צא מהחדר','עבור למקום משותף או ציבורי','הישאר שם 5 דקות'],requires:'alone',weight:10},
+ {id:'music-task',title:'מוזיקה + משימה בידיים',desc:'מחליפים את האוטומט בפעילות מוגדרת ולא פסיבית.',duration:600,steps:['בחר פלייליסט אחד','הנח את הטלפון רחוק אחרי ההפעלה','סדר, נקה או הרכב משהו 10 דקות'],requiresResource:'music',weight:6},
+ {id:'study-sprint',title:'ספרינט לימוד של 10 דקות',desc:'יעד קצר וברור נותן למוח משהו אחר להיצמד אליו.',duration:600,steps:['פתח רק חומר אחד','כוון טיימר ל-10 דקות','עשה תרגיל אחד או קרא עמודים ספורים'],requiresResource:'study',triggers:['שעמום','הרגל אוטומטי'],weight:7},
+ {id:'small-task',title:'משימה קטנה של 5 דקות',desc:'כשאין כוח לפרויקט גדול, עושים משהו קטן וסגור.',duration:300,steps:['בחר משימה אחת קטנה','שים את הטלפון בצד','סיים רק את המשימה הזאת'],requiresResource:'task',weight:6},
+ {id:'message-someone',title:'לשלוח הודעה למישהו',desc:'לא חייבים לדבר על הדחף — רק לצאת מבידוד.',duration:180,steps:['בחר אדם אחד','שלח הודעה פשוטה','אל תחזור למסך/מקום שהפעיל אותך עד שיש שינוי הקשר'],requiresResource:'contact',requires:'alone',weight:8},
+ {id:'call-someone',title:'להתקשר למישהו',desc:'קול אנושי ושינוי הקשר יכולים לשבור את הרגע מהר.',duration:300,steps:['בחר אדם אחד שקל לדבר איתו','התקשר גם בלי להסביר למה','הישאר בשיחה כמה דקות'],requiresResource:'contact',requires:'alone',weight:8},
+ {id:'phone-lock',title:'לנעול ולהרחיק את הטלפון',desc:'אם הטלפון חלק מהלולאה, עדיף להסיר אותו פיזית.',duration:300,steps:['נעל את המסך','שים את הטלפון בחדר אחר','בצע פעולה אחרת 5 דקות'],triggers:['טלפון','תוכן ברשת','לילה'],activities:['גלילה'],weight:12},
+ {id:'bed-exit',title:'לצאת מהמיטה',desc:'אם המיטה הפכה לטריגר, לא נשארים באותה תנוחה וסביבה.',duration:300,steps:['קום מהמיטה','הדלק אור','עבור לחדר אחר ל-5 דקות'],activities:['מיטה'],weight:12},
+ {id:'breath-90',title:'90 שניות נשימה',desc:'להוריד את העוררות לפני שבוחרים את הצעד הבא.',duration:90,steps:['הנח רגליים על הרצפה','שאף 4 שניות ונשוף 6 שניות','חזור על זה 9 פעמים'],requiresResource:'breathing',weight:5,feelings:['חרדה','מתח','כעס/תסכול']},
+ {id:'write-two-lines',title:'לכתוב שתי שורות',desc:'לתת שם למה שקורה במקום לברוח ממנו.',duration:180,steps:['כתוב מה אתה מרגיש עכשיו','כתוב מה אתה באמת צריך כרגע','בחר צעד קטן אחד בהתאם'],requiresResource:'journal',triggers:['מתח','חרדה','בדידות'],weight:7},
+ {id:'remember-why',title:'להיזכר למה התחלת',desc:'כשהראש מצמצם את העולם לרגע הזה, מחזירים את התמונה הגדולה.',duration:120,steps:['פתח את הסיבה ששמרת באפליקציה','קרא אותה לאט פעמיים','כתוב משפט אחד שאתה רוצה לזכור בעוד שעה'],weight:6,requiresWhy:true},
+ {id:'quiet-audio',title:'צליל רגוע בלי גלילה',desc:'מחליפים גירוי חזותי ברקע שמע רגוע.',duration:300,steps:['בחר מוזיקה או צליל רגוע','כבה את המסך','הישאר 5 דקות בלי לפתוח אפליקציות אחרות'],requiresResource:'music',feelings:['חרדה','מתח','עייפות'],weight:5},
+ {id:'night-reset-action',title:'טקס לילה בלי מסך',desc:'כשהעייפות והלילה מתחברים לדחף, משנים את כל ההקשר.',duration:600,steps:['הנח את הטלפון מחוץ למיטה','שטוף פנים/צחצח שיניים','עשה 10 דקות של פעילות שקטה בלי מסך'],triggers:['לילה','עייפות'],weight:9}
 ];
+
+const resourceLabels={
+ 'lego-near':'לגו לידי',
+ 'lego-away':'לגו נמצא במקום אחר',
+ 'shower':'מקלחת',
+ 'water':'מים',
+ 'exercise':'אפשר להתאמן',
+ 'walk':'אפשר לצאת להליכה',
+ 'contact':'אפשר לפנות למישהו',
+ 'music':'מוזיקה/אוזניות',
+ 'study':'חומר לימוד',
+ 'journal':'אפשר לכתוב',
+ 'task':'יש משימה קטנה לעשות',
+ 'breathing':'נשימה'
+};
+const feelingLabels=['רגוע יחסית','משועמם','לחוץ','חרד','בודד','כועס/מתוסכל','עייף','חסר שקט'];
+const activityLabels=['מיטה','גלילה','ישיבה לבד','לימודים/עבודה','שירותים/מקלחת','צפייה בתוכן','בחוץ','אחר'];
+
 function actionPlansFor(trigger){return triggerActionPlans[trigger]||triggerActionPlans['שעמום'];}
 function adaptiveActionAllowed(a,s){
- const c=s.context||{};
- if(a.locations?.length && c.location && !a.locations.includes(c.location))return false;
- if(a.requires==='lego-near'&&c.lego!=='near')return false;
- if(a.requires==='lego-away'&&c.lego!=='away')return false;
+ const c=s.context||{}, resources=new Set(c.resources||[]);
+ if(a.requiresWhy&&!state.why)return false;
+ if(a.requiresResource&&!resources.has(a.requiresResource))return false;
  if(a.requires==='can-leave'&&c.canLeave===false)return false;
  if(a.requires==='alone'&&c.alone!==true)return false;
  return true;
 }
 function actionScore(a,s){
+ const c=s.context||{};
  let score=a.weight||0;
  if(a.triggers?.includes(s.trigger))score+=8;
- if((s.intensity||0)>=8 && ['breath-90','micro-workout','outside-walk','shared-space','phone-lock'].includes(a.id))score+=4;
- if(s.context?.location==='מיטה'&&a.id==='bed-exit')score+=8;
- if(s.context?.lego==='near'&&a.id==='lego-build')score+=12;
- if(s.context?.lego==='away'&&a.id==='lego-fetch')score+=12;
- if(s.context?.alone===true&&['shared-space','message-someone'].includes(a.id))score+=5;
+ if(a.feelings?.includes(c.feeling))score+=6;
+ if(a.activities?.includes(c.activity))score+=8;
+ if((s.intensity||0)>=8&&a.highIntensity)score+=15;
+ if((s.intensity||0)>=8&&['breath-90','micro-workout','outside-walk','shared-space','phone-lock','leave-room'].includes(a.id))score+=4;
+ if(c.activity==='מיטה'&&a.id==='bed-exit')score+=12;
+ if(c.activity==='גלילה'&&a.id==='phone-lock')score+=12;
+ if(c.alone===true&&['shared-space','message-someone','call-someone'].includes(a.id))score+=6;
  if(['טלפון','תוכן ברשת'].includes(s.trigger)&&a.id==='phone-lock')score+=8;
+ if(c.resources?.includes('lego-near')&&a.id==='lego-build')score+=14;
+ if(c.resources?.includes('lego-away')&&a.id==='lego-fetch')score+=14;
+ if(c.feeling==='חרד'&&a.id==='breath-90')score+=8;
+ if(c.feeling==='כועס/מתוסכל'&&a.id==='micro-workout')score+=8;
  return score;
 }
 function allActionsFor(session){
@@ -284,12 +322,12 @@ function recommendedActionsFor(session){
  const offset=session.suggestionOffset||0;
  const unavailable=new Set(session.unavailableActions||[]);
  const ranked=allActionsFor(session).filter(a=>!unavailable.has(a.id)).sort((a,b)=>actionScore(b,session)-actionScore(a,session));
- if(!ranked.length)return actionPlansFor(session.trigger);
- const count=Math.min(5,ranked.length);
+ if(!ranked.length)return [{id:'breath-90',title:'90 שניות נשימה',desc:'אם כרגע שום דבר אחר לא אפשרי, רק מורידים את העוררות.',duration:90,steps:['הנח רגליים על הרצפה','שאף 4 שניות ונשוף 6 שניות','חזור על זה 9 פעמים']}];
+ const count=Math.min(6,ranked.length);
  const rotated=ranked.map((_,i)=>ranked[(i+offset)%ranked.length]);
  return rotated.slice(0,count);
 }
-function actionById(session,id){return allActionsFor(session).find(a=>a.id===id)||actionPlansFor(session.trigger).find(a=>a.id===id);}
+function actionById(session,id){return allActionsFor(session).find(a=>a.id===id)||actionPlansFor(session.trigger).find(a=>a.id===id)||adaptiveActions.find(a=>a.id===id);}
 function activeIntervention(){return [...(state.interventions||[])].reverse().find(x=>x.status==='active'||x.status==='choosing'||x.status==='reassess')||null;}
 
 const taskForDay=day=>dailyTasks[(day-1)%dailyTasks.length];
@@ -555,47 +593,61 @@ function bindSheet(type){
 }
 
 function startAdaptiveUrgeFlow(){
- urgeDraft={intensity:6,trigger:null,context:{location:null,alone:null,lego:null,canLeave:null}};
+ urgeDraft={intensity:6,trigger:null,context:{feeling:null,activity:null,location:null,alone:null,canLeave:null,resources:[]}};
  renderAdaptiveUrgeStep('intensity');
 }
 function flowDots(step){
- const steps=['intensity','trigger','location','alone','lego'];
+ const steps=['intensity','trigger','feeling','activity','location','alone','resources'];
  const idx=steps.indexOf(step);
  return `<div class="flow-dots">${steps.map((_,i)=>`<i class="${i<=idx?'on':''}"></i>`).join('')}</div>`;
 }
 function renderAdaptiveUrgeStep(step){
  const s=$('#sheet');if(!s)return;
- const d=urgeDraft||(urgeDraft={intensity:6,trigger:null,context:{location:null,alone:null,lego:null,canLeave:null}});
+ const d=urgeDraft||(urgeDraft={intensity:6,trigger:null,context:{feeling:null,activity:null,location:null,alone:null,canLeave:null,resources:[]}});
  const head=(title,sub)=>`<div class="coach-head adaptive-head">${flowDots(step)}<h2>${title}</h2><p class="sub">${sub}</p></div>`;
  if(step==='intensity'){
   s.innerHTML=`<div class="sheet-grab"></div>${head(state.discreet?'כמה חזק זה עכשיו?':'כמה חזק הדחף עכשיו?','נשתמש בעוצמה כדי לבחור צעד שמתאים לרגע הזה.')}<div class="urge-meter"><strong id="adaptiveIntensity">${d.intensity}/10</strong><span id="adaptiveIntensityWord">${d.intensity>=8?'חזק':d.intensity>=5?'בינוני':'קל'}</span></div><input class="adaptive-range" id="adaptiveRange" type="range" min="1" max="10" value="${d.intensity}"><div class="intensity-pills"><button data-intensity="3">קל</button><button data-intensity="6">בינוני</button><button data-intensity="9">חזק</button></div><button class="primary-btn" id="adaptiveNext">המשך</button>`;
   $('#adaptiveRange').oninput=e=>{d.intensity=+e.target.value;$('#adaptiveIntensity').textContent=`${d.intensity}/10`;$('#adaptiveIntensityWord').textContent=d.intensity>=8?'חזק':d.intensity>=5?'בינוני':'קל'};
-  $('[data-intensity]').forEach(b=>b.onclick=()=>{$('#adaptiveRange').value=b.dataset.intensity;$('#adaptiveRange').dispatchEvent(new Event('input'));haptic(6)});
+  $$('[data-intensity]').forEach(b=>b.onclick=()=>{$('#adaptiveRange').value=b.dataset.intensity;$('#adaptiveRange').dispatchEvent(new Event('input'));haptic(6)});
   $('#adaptiveNext').onclick=()=>renderAdaptiveUrgeStep('trigger');
  }
  if(step==='trigger'){
-  s.innerHTML=`<div class="sheet-grab"></div>${head('מה הצית את הדחף?','לא צריך לנתח לעומק. בחר את הדבר שהכי קרוב למה שקורה עכשיו.')}<div class="adaptive-grid">${triggerLabels.map(x=>`<button class="adaptive-choice ${d.trigger===x?'selected':''}" data-trigger="${x}">${x}</button>`).join('')}</div><button class="primary-btn" id="adaptiveNext" ${d.trigger?'':'disabled'}>המשך</button><button class="coach-link" id="adaptiveBack">חזרה</button>`;
-  $('[data-trigger]').forEach(b=>b.onclick=()=>{d.trigger=b.dataset.trigger;$('[data-trigger]').forEach(x=>x.classList.toggle('selected',x===b));$('#adaptiveNext').disabled=false;haptic(6)});
-  $('#adaptiveNext').onclick=()=>renderAdaptiveUrgeStep('location');$('#adaptiveBack').onclick=()=>renderAdaptiveUrgeStep('intensity');
+  s.innerHTML=`<div class="sheet-grab"></div>${head('מה הצית את הדחף?','בחר את הדבר שהכי קרוב למה שקורה עכשיו.')}<div class="adaptive-grid">${triggerLabels.map(x=>`<button class="adaptive-choice ${d.trigger===x?'selected':''}" data-trigger="${x}">${x}</button>`).join('')}</div><button class="primary-btn" id="adaptiveNext" ${d.trigger?'':'disabled'}>המשך</button><button class="coach-link" id="adaptiveBack">חזרה</button>`;
+  $$('[data-trigger]').forEach(b=>b.onclick=()=>{d.trigger=b.dataset.trigger;$$('[data-trigger]').forEach(x=>x.classList.toggle('selected',x===b));$('#adaptiveNext').disabled=false;haptic(6)});
+  $('#adaptiveNext').onclick=()=>renderAdaptiveUrgeStep('feeling');$('#adaptiveBack').onclick=()=>renderAdaptiveUrgeStep('intensity');
+ }
+ if(step==='feeling'){
+  s.innerHTML=`<div class="sheet-grab"></div>${head('מה אתה מרגיש עכשיו?','הרגש משנה מאוד איזה סוג פעולה יעזור יותר.')}<div class="adaptive-grid">${feelingLabels.map(x=>`<button class="adaptive-choice ${d.context.feeling===x?'selected':''}" data-feeling="${x}">${x}</button>`).join('')}</div><button class="primary-btn" id="adaptiveNext" ${d.context.feeling?'':'disabled'}>המשך</button><button class="coach-link" id="adaptiveBack">חזרה</button>`;
+  $$('[data-feeling]').forEach(b=>b.onclick=()=>{d.context.feeling=b.dataset.feeling;$$('[data-feeling]').forEach(x=>x.classList.toggle('selected',x===b));$('#adaptiveNext').disabled=false;haptic(6)});
+  $('#adaptiveNext').onclick=()=>renderAdaptiveUrgeStep('activity');$('#adaptiveBack').onclick=()=>renderAdaptiveUrgeStep('trigger');
+ }
+ if(step==='activity'){
+  s.innerHTML=`<div class="sheet-grab"></div>${head('מה אתה עושה כרגע?','לפעמים הדבר הכי חשוב הוא לשבור את הפעולה שכבר מתרחשת.')}<div class="adaptive-grid">${activityLabels.map(x=>`<button class="adaptive-choice ${d.context.activity===x?'selected':''}" data-activity="${x}">${x}</button>`).join('')}</div><button class="primary-btn" id="adaptiveNext" ${d.context.activity?'':'disabled'}>המשך</button><button class="coach-link" id="adaptiveBack">חזרה</button>`;
+  $$('[data-activity]').forEach(b=>b.onclick=()=>{d.context.activity=b.dataset.activity;$$('[data-activity]').forEach(x=>x.classList.toggle('selected',x===b));$('#adaptiveNext').disabled=false;haptic(6)});
+  $('#adaptiveNext').onclick=()=>renderAdaptiveUrgeStep('location');$('#adaptiveBack').onclick=()=>renderAdaptiveUrgeStep('feeling');
  }
  if(step==='location'){
-  const locations=['מיטה','חדר','בית','עבודה/לימודים','בחוץ','אחר'];
-  s.innerHTML=`<div class="sheet-grab"></div>${head('איפה אתה עכשיו?','המיקום משנה אילו פעולות באמת אפשריות כרגע.')}<div class="adaptive-grid">${locations.map(x=>`<button class="adaptive-choice ${d.context.location===x?'selected':''}" data-location="${x}">${x}</button>`).join('')}</div><button class="primary-btn" id="adaptiveNext" ${d.context.location?'':'disabled'}>המשך</button><button class="coach-link" id="adaptiveBack">חזרה</button>`;
-  $('[data-location]').forEach(b=>b.onclick=()=>{d.context.location=b.dataset.location;$('[data-location]').forEach(x=>x.classList.toggle('selected',x===b));$('#adaptiveNext').disabled=false;haptic(6)});
-  $('#adaptiveNext').onclick=()=>renderAdaptiveUrgeStep('alone');$('#adaptiveBack').onclick=()=>renderAdaptiveUrgeStep('trigger');
+  const locations=['חדר','בית','עבודה/לימודים','רכב/תחבורה','בחוץ','מקום ציבורי','אחר'];
+  s.innerHTML=`<div class="sheet-grab"></div>${head('איפה אתה עכשיו?','המיקום מסנן פעולות שלא באמת אפשריות כרגע.')}<div class="adaptive-grid">${locations.map(x=>`<button class="adaptive-choice ${d.context.location===x?'selected':''}" data-location="${x}">${x}</button>`).join('')}</div><button class="primary-btn" id="adaptiveNext" ${d.context.location?'':'disabled'}>המשך</button><button class="coach-link" id="adaptiveBack">חזרה</button>`;
+  $$('[data-location]').forEach(b=>b.onclick=()=>{d.context.location=b.dataset.location;$$('[data-location]').forEach(x=>x.classList.toggle('selected',x===b));$('#adaptiveNext').disabled=false;haptic(6)});
+  $('#adaptiveNext').onclick=()=>renderAdaptiveUrgeStep('alone');$('#adaptiveBack').onclick=()=>renderAdaptiveUrgeStep('activity');
  }
  if(step==='alone'){
-  s.innerHTML=`<div class="sheet-grab"></div>${head('אתה לבד כרגע?','זה עוזר לנו להחליט אם עדיף שינוי סביבה, קשר עם מישהו או פעולה עצמאית.')}<div class="adaptive-grid two"><button class="adaptive-choice ${d.context.alone===true?'selected':''}" data-alone="1">כן, לבד</button><button class="adaptive-choice ${d.context.alone===false?'selected':''}" data-alone="0">לא</button></div><div class="mini-question"><b>אפשר לצאת מהמקום אם צריך?</b><div class="adaptive-grid two"><button class="adaptive-choice ${d.context.canLeave===true?'selected':''}" data-leave="1">כן</button><button class="adaptive-choice ${d.context.canLeave===false?'selected':''}" data-leave="0">לא כרגע</button></div></div><button class="primary-btn" id="adaptiveNext" ${d.context.alone===null||d.context.canLeave===null?'disabled':''}>המשך</button><button class="coach-link" id="adaptiveBack">חזרה</button>`;
-  $('[data-alone]').forEach(b=>b.onclick=()=>{d.context.alone=b.dataset.alone==='1';$('[data-alone]').forEach(x=>x.classList.toggle('selected',x===b));$('#adaptiveNext').disabled=d.context.alone===null||d.context.canLeave===null;haptic(6)});
-  $('[data-leave]').forEach(b=>b.onclick=()=>{d.context.canLeave=b.dataset.leave==='1';$('[data-leave]').forEach(x=>x.classList.toggle('selected',x===b));$('#adaptiveNext').disabled=d.context.alone===null||d.context.canLeave===null;haptic(6)});
-  $('#adaptiveNext').onclick=()=>renderAdaptiveUrgeStep('lego');$('#adaptiveBack').onclick=()=>renderAdaptiveUrgeStep('location');
+  s.innerHTML=`<div class="sheet-grab"></div>${head('אתה לבד כרגע?','נשתמש בזה כדי לבחור בין שינוי סביבה, קשר עם מישהו או פעולה עצמאית.')}<div class="adaptive-grid two"><button class="adaptive-choice ${d.context.alone===true?'selected':''}" data-alone="1">כן, לבד</button><button class="adaptive-choice ${d.context.alone===false?'selected':''}" data-alone="0">לא</button></div><div class="mini-question"><b>אפשר לצאת מהמקום אם צריך?</b><div class="adaptive-grid two"><button class="adaptive-choice ${d.context.canLeave===true?'selected':''}" data-leave="1">כן</button><button class="adaptive-choice ${d.context.canLeave===false?'selected':''}" data-leave="0">לא כרגע</button></div></div><button class="primary-btn" id="adaptiveNext" ${d.context.alone===null||d.context.canLeave===null?'disabled':''}>המשך</button><button class="coach-link" id="adaptiveBack">חזרה</button>`;
+  $$('[data-alone]').forEach(b=>b.onclick=()=>{d.context.alone=b.dataset.alone==='1';$$('[data-alone]').forEach(x=>x.classList.toggle('selected',x===b));$('#adaptiveNext').disabled=d.context.alone===null||d.context.canLeave===null;haptic(6)});
+  $$('[data-leave]').forEach(b=>b.onclick=()=>{d.context.canLeave=b.dataset.leave==='1';$$('[data-leave]').forEach(x=>x.classList.toggle('selected',x===b));$('#adaptiveNext').disabled=d.context.alone===null||d.context.canLeave===null;haptic(6)});
+  $('#adaptiveNext').onclick=()=>renderAdaptiveUrgeStep('resources');$('#adaptiveBack').onclick=()=>renderAdaptiveUrgeStep('location');
  }
- if(step==='lego'){
-  const atHome=['בית','חדר','מיטה'].includes(d.context.location);
-  if(!atHome){d.context.lego='none';return finishAdaptiveUrgeFlow();}
-  s.innerHTML=`<div class="sheet-grab"></div>${head('ומה עם הלגו?','הוספתי אותו כאחת מאפשרויות היציאה מהלולאה, אבל רק כשזה באמת זמין.')}<div class="adaptive-stack"><button class="adaptive-choice wide ${d.context.lego==='near'?'selected':''}" data-lego="near"><b>הלגו לידי</b><small>אפשר להתחיל לבנות מיד</small></button><button class="adaptive-choice wide ${d.context.lego==='away'?'selected':''}" data-lego="away"><b>יש לגו, אבל הוא לא לידי</b><small>אפשר לקום וללכת להביא אותו</small></button><button class="adaptive-choice wide ${d.context.lego==='none'?'selected':''}" data-lego="none"><b>לא זמין עכשיו</b><small>נבחר משהו אחר</small></button></div><button class="primary-btn" id="adaptiveNext" ${d.context.lego?'':'disabled'}>תן לי פעולה</button><button class="coach-link" id="adaptiveBack">חזרה</button>`;
-  $('[data-lego]').forEach(b=>b.onclick=()=>{d.context.lego=b.dataset.lego;$('[data-lego]').forEach(x=>x.classList.toggle('selected',x===b));$('#adaptiveNext').disabled=false;haptic(6)});
-  $('#adaptiveNext').onclick=finishAdaptiveUrgeFlow;$('#adaptiveBack').onclick=()=>renderAdaptiveUrgeStep('alone');
+ if(step==='resources'){
+  const atHome=['בית','חדר'].includes(d.context.location);
+  const all=[
+    ...(atHome?[['lego-near','לגו לידי'],['lego-away','יש לגו, אבל הוא לא לידי'],['shower','מקלחת']]:[]),
+    ['water','מים'],['exercise','אפשר להתאמן'],['walk','אפשר לצאת להליכה'],['contact','אפשר לפנות למישהו'],['music','מוזיקה/אוזניות'],['study','חומר לימוד'],['journal','אפשר לכתוב'],['task','יש משימה קטנה'],['breathing','נשימה']
+  ];
+  const selected=new Set(d.context.resources||[]);
+  s.innerHTML=`<div class="sheet-grab"></div>${head('מה זמין לך עכשיו?','אפשר לבחור כמה. מכאן אנחנו מייצרים הרבה יותר הסתעפויות ולא רשימה קבועה.')}<div class="resource-grid">${all.map(([id,label])=>`<button class="resource-choice ${selected.has(id)?'selected':''}" data-resource="${id}"><span>${selected.has(id)?icon('check'):''}</span><b>${label}</b></button>`).join('')}</div><button class="primary-btn" id="adaptiveNext">תן לי פעולות שמתאימות עכשיו</button><button class="secondary-btn" id="noResources">שום דבר מהרשימה לא זמין</button><button class="coach-link" id="adaptiveBack">חזרה</button>`;
+  $$('[data-resource]').forEach(b=>b.onclick=()=>{const id=b.dataset.resource;const set=new Set(d.context.resources||[]);if(set.has(id))set.delete(id);else{if(id==='lego-near')set.delete('lego-away');if(id==='lego-away')set.delete('lego-near');set.add(id)}d.context.resources=[...set];$$('[data-resource]').forEach(x=>{const on=set.has(x.dataset.resource);x.classList.toggle('selected',on);x.querySelector('span').innerHTML=on?icon('check'):''});haptic(6)});
+  $('#adaptiveNext').onclick=finishAdaptiveUrgeFlow;$('#noResources').onclick=()=>{d.context.resources=[];finishAdaptiveUrgeFlow()};$('#adaptiveBack').onclick=()=>renderAdaptiveUrgeStep('alone');
  }
  enableSheetDrag();
 }
@@ -618,12 +670,13 @@ function renderActionPicker(id){
   session.status='choosing';save();
   const plans=recommendedActionsFor(session);
   const c=session.context||{};
-  const contextBits=[c.location,c.alone===true?'לבד':c.alone===false?'עם אנשים':null,c.lego==='near'?'לגו לידך':c.lego==='away'?'לגו לא לידך':null].filter(Boolean);
-  const s=$('#sheet');s.innerHTML=`<div class="sheet-grab"></div><div class="coach-head adaptive-result-head"><span class="coach-step">הצעות שמתאימות לרגע הזה</span><h2>בחר פעולה אחת</h2><p class="sub">לפי <b>${esc(session.trigger)}</b> · עוצמה ${session.intensity}/10${contextBits.length?' · '+contextBits.map(esc).join(' · '):''}. אם משהו לא אפשרי — מסמנים ומקבלים חלופות.</p></div><div class="action-plan-list">${plans.map((a,i)=>`<div class="adaptive-plan-wrap"><button class="action-plan ${i===0?'recommended':''}" data-plan="${a.id}"><span class="plan-num">${i+1}</span><span><b>${esc(a.title)}</b><small>${esc(a.desc)}</small><em>${Math.max(1,Math.round(a.duration/60))} דק׳ · ${a.steps.length} צעדים</em></span><span class="arrow">‹</span></button><button class="plan-unavailable" data-unavailable="${a.id}">לא אפשרי כרגע</button></div>`).join('')}</div><button class="secondary-btn" id="moreActions">תן לי אפשרויות אחרות</button><button class="coach-link" id="cancelIntervention">לא עכשיו</button>`;
+  const contextBits=[c.feeling,c.activity,c.location,c.alone===true?'לבד':c.alone===false?'עם אנשים':null,...(c.resources||[]).slice(0,2).map(x=>resourceLabels[x]||x)].filter(Boolean);
+  const s=$('#sheet');s.innerHTML=`<div class="sheet-grab"></div><div class="coach-head adaptive-result-head"><span class="coach-step">הצעות שמתאימות לרגע הזה</span><h2>בחר פעולה אחת</h2><p class="sub">לפי <b>${esc(session.trigger)}</b> · עוצמה ${session.intensity}/10${contextBits.length?' · '+contextBits.map(esc).join(' · '):''}. אם משהו לא אפשרי — מסמנים ומקבלים חלופות.</p></div><div class="action-plan-list">${plans.map((a,i)=>`<div class="adaptive-plan-wrap"><button class="action-plan ${i===0?'recommended':''}" data-plan="${a.id}"><span class="plan-num">${i+1}</span><span><b>${esc(a.title)}</b><small>${esc(a.desc)}</small><em>${Math.max(1,Math.round(a.duration/60))} דק׳ · ${a.steps.length} צעדים</em></span><span class="arrow">‹</span></button><button class="plan-unavailable" data-unavailable="${a.id}">לא אפשרי כרגע</button></div>`).join('')}</div><button class="secondary-btn" id="moreActions">תן לי אפשרויות אחרות</button><button class="secondary-btn" id="noOptionWorks">אף אפשרות לא מתאימה לי</button><button class="coach-link" id="cancelIntervention">לא עכשיו</button>`;
   enableSheetDrag();
   $$('.action-plan').forEach(btn=>btn.onclick=()=>beginInterventionAction(id,btn.dataset.plan));
   $$('[data-unavailable]').forEach(btn=>btn.onclick=()=>{session.unavailableActions=[...new Set([...(session.unavailableActions||[]),btn.dataset.unavailable])];save();haptic(6);renderActionPicker(id)});
   $('#moreActions').onclick=()=>{session.suggestionOffset=(session.suggestionOffset||0)+3;save();haptic(6);renderActionPicker(id)};
+  $('#noOptionWorks').onclick=()=>{closeSheet(false);setTimeout(openSOS,60)};
   $('#cancelIntervention').onclick=()=>{session.status='abandoned';save();closeSheet();toast('נשמר. אפשר לחזור ולנסות שוב בכל רגע')};
 }
 function beginInterventionAction(id,actionId){
