@@ -273,7 +273,7 @@
     if (!initSdk()) throw new Error('Appwrite SDK לא זמין');
     setCloudStatus('connecting');
     try {
-      await account.createEmailPasswordSession({ email: String(email).trim(), password });
+      await account.createEmailPasswordSession(String(email).trim(), password);
       await refreshUser();
       await syncInitial();
       return snapshot();
@@ -287,12 +287,12 @@
     if (!initSdk()) throw new Error('Appwrite SDK לא זמין');
     setCloudStatus('connecting');
     try {
-      await account.create({
-        userId: Appwrite.ID.unique(),
-        email: String(email).trim(),
+      await account.create(
+        Appwrite.ID.unique(),
+        String(email).trim(),
         password,
-        name: String(name || '').trim()
-      });
+        String(name || '').trim()
+      );
       await account.createEmailPasswordSession({ email: String(email).trim(), password });
       await refreshUser();
       await syncInitial();
