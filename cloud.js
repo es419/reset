@@ -77,9 +77,31 @@
     return error?.message || 'הסנכרון נכשל';
   }
 
+  let sdkPromise = null;
   async function ensureSdk() {
     if (window.Appwrite) return initSdk();
-    try { await window.__focusAppwriteReady; } catch {}
+    if (!sdkPromise) {
+      sdkPromise = new Promise(resolve => {
+        const existing = document.querySelector('script[data-focus-appwrite]');
+        if (existing) {
+          existing.addEventListener('load', () => resolve(!!window.Appwrite), { once: true });
+          existing.addEventListener('error', () => resolve(false), { once: true });
+          setTimeout(() => resolve(!!window.Appwrite), 8000);
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/appwrite@23.0.0';
+        script.async = true;
+        script.dataset.focusAppwrite = '1';
+        let settled = false;
+        const finish = ok => { if (!settled) { settled = true; resolve(ok); } };
+        script.onload = () => finish(!!window.Appwrite);
+        script.onerror = () => finish(false);
+        document.head.appendChild(script);
+        setTimeout(() => finish(!!window.Appwrite), 8000);
+      });
+    }
+    try { await sdkPromise; } catch {}
     return initSdk();
   }
 
