@@ -55,9 +55,6 @@ const icons={
   stats:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>',
   home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9.5Z"/></svg>',
   journey:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="17" r="2"/><circle cx="19" cy="7" r="2"/><path d="M7 16c3-1 3-5 6-6 2-.7 2.5 1 4 0"/></svg>',
-  arrowUp:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 5v14"/></svg>',
-  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
-  chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H8l-5 3 1.5-5A8.5 8.5 0 1 1 21 12Z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/></svg>',
   tools:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m14.7 6.3 3-3a4 4 0 0 1-5 5L5 16l3 3 7.7-7.7a4 4 0 0 1-1-5Z"/></svg>',
   smile:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 10h.01M15.5 10h.01M8.5 14.5c1 1.1 2.1 1.6 3.5 1.6s2.5-.5 3.5-1.6"/></svg>',
   bolt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-7 11h5l-1 9 8-12h-5V2Z"/></svg>',
@@ -372,7 +369,7 @@ function navigate(v,push=true,direction=''){
 function render(){
   clearInterval(homeClockTimer); clearInterval(quoteTimer); homeClockTimer=null; quoteTimer=null;
   updateBest(); const view=$('#view'); view.scrollTop=0;
-  view.innerHTML=({home:homeView,journey:journeyView,stats:statsView,tools:toolsView,chat:chatView,settings:settingsView}[currentView]||homeView)();
+  view.innerHTML=({home:homeView,journey:journeyView,stats:statsView,tools:toolsView,settings:settingsView}[currentView]||homeView)();
   const screen=$('.screen',view); if(screen&&transitionClass)screen.classList.add(transitionClass); transitionClass=''; applyDiscreetMode(); bindView();
 }
 const delay=i=>`style="--delay:${Math.min(i*55,330)}ms"`;
@@ -513,57 +510,10 @@ function homeSlipInsight(){
   return `<button class="card home-learning reveal" ${delay(5)} id="openSlipInsights"><span>${icon('spark')}</span><span><small>${discreet?'תובנה מההיסטוריה':'האפליקציה מתחילה ללמוד אותך'}</small><b>${esc(r.topDay?`יום ${weekDayNames[r.topDay.weekday]} סביב ${String(r.topHour.hour).padStart(2,'0')}:00 חוזר אצלך יותר.`:`סביב ${String(r.topHour.hour).padStart(2,'0')}:00 נרשמו יותר איפוסים.`)}</b><em>פתח סטטיסטיקות כדי לראות את הדפוס</em></span><span class="arrow">‹</span></button>`;
 }
 
-
-const AI_CHAT_ENDPOINT='https://reset-ai.eladshimonn.workers.dev/chat';
-const AI_CHAT_KEY='reset90-ai-chat-v1';
-function loadAiChat(){try{const v=JSON.parse(localStorage.getItem(AI_CHAT_KEY)||'[]');return Array.isArray(v)?v.slice(-80):[]}catch{return []}}
-function saveAiChat(messages){localStorage.setItem(AI_CHAT_KEY,JSON.stringify((messages||[]).slice(-80)))}
-function clearAiChat(){localStorage.removeItem(AI_CHAT_KEY)}
-function chatView(){
-  const messages=loadAiChat(),cloud=cloudSnapshot(),empty=!messages.length;
-  return `<section class="screen ai-chat-screen">
-    <div class="ai-chat-head reveal" ${delay(0)}><button class="ai-back" id="aiBack" aria-label="חזרה">${icon('chev')}</button><div><div class="eyebrow">צ׳אט AI</div><h1>דבר איתי.</h1><p>שיחה חופשית וממוקדת בתהליך שלך, בלי שאלון ובלי מסלול קבוע.</p></div><button class="ai-new" id="aiNewChat">חדש</button></div>
-    <div class="ai-chat-status ${cloud.user?'online':'offline'}"><i></i><span>${cloud.user?'מחובר לחשבון · השיחה נשמרת במכשיר':'צריך להתחבר לחשבון כדי להשתמש בצ׳אט'}</span></div>
-    <div class="ai-messages" id="aiMessages">${empty?`<div class="ai-empty"><span>${icon('chat')}</span><h2>מה עובר עליך עכשיו?</h2><p>לא צריך לנסח יפה. פשוט תכתוב כמו שאתה מדבר.</p><div class="ai-starters"><button data-ai-starter="יש לי דחף עכשיו ואני רוצה לדבר עליו">יש לי דחף עכשיו</button><button data-ai-starter="הייתה לי נפילה ואני מבואס מזה">הייתה לי נפילה</button><button data-ai-starter="אני רוצה פשוט לדבר קצת על איך הולך לי בתהליך">בא לי לדבר</button></div></div>`:messages.map(m=>`<div class="ai-msg ${m.role==='user'?'me':'bot'}"><div class="ai-bubble">${esc(m.text).replace(/\n/g,'<br>')}</div></div>`).join('')}</div>
-    <form class="ai-composer" id="aiComposer"><textarea id="aiInput" rows="1" maxlength="4000" placeholder="כתוב משהו…"${cloud.user?'':' disabled'}></textarea><button type="submit" id="aiSend" aria-label="שלח"${cloud.user?'':' disabled'}>${icon('arrowUp')}</button></form>
-  </section>`;
-}
-function scrollAiBottom(){const box=$('#aiMessages');if(box)requestAnimationFrame(()=>box.scrollTop=box.scrollHeight)}
-function appendAiBubble(role,text,id=''){const box=$('#aiMessages');if(!box)return null;box.querySelector('.ai-empty')?.remove();const wrap=document.createElement('div');wrap.className=`ai-msg ${role==='user'?'me':'bot'}`;if(id)wrap.id=id;const bubble=document.createElement('div');bubble.className='ai-bubble';bubble.textContent=text;wrap.appendChild(bubble);box.appendChild(wrap);scrollAiBottom();return bubble}
-async function sendAiMessage(text){
- const clean=String(text||'').trim();if(!clean)return;
- const input=$('#aiInput'),send=$('#aiSend');if(input)input.value='';if(send)send.disabled=true;
- const messages=loadAiChat();messages.push({role:'user',text:clean,at:new Date().toISOString()});saveAiChat(messages);appendAiBubble('user',clean);
- const bot=appendAiBubble('assistant','');bot?.closest('.ai-msg')?.classList.add('typing');let answer='';
- try{
-  const jwt=await window.FocusCloud.getJWT();
-  const history=messages.slice(-20).map(x=>({role:x.role==='assistant'?'assistant':'user',content:x.text}));
-  const res=await fetch(AI_CHAT_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${jwt}`},body:JSON.stringify({messages:history})});
-  if(!res.ok){let msg='לא הצלחתי להתחבר לצ׳אט';try{const j=await res.json();msg=j.error||msg}catch{}throw new Error(msg)}
-  const reader=res.body?.getReader();if(!reader)throw new Error('השרת לא החזיר תשובה');
-  const decoder=new TextDecoder();let buffer='';
-  while(true){const {value,done}=await reader.read();if(done)break;buffer+=decoder.decode(value,{stream:true});const lines=buffer.split('\n');buffer=lines.pop()||'';for(const line of lines){if(!line.startsWith('data:'))continue;const raw=line.slice(5).trim();if(!raw||raw==='[DONE]')continue;try{const evt=JSON.parse(raw);if(evt.type==='response.output_text.delta'&&evt.delta){answer+=evt.delta;if(bot)bot.textContent=answer;scrollAiBottom()}}catch{}}}
-  if(!answer.trim())throw new Error('לא התקבלה תשובה');
-  const updated=loadAiChat();updated.push({role:'assistant',text:answer.trim(),at:new Date().toISOString()});saveAiChat(updated);
- }catch(err){if(bot)bot.textContent=`לא הצלחתי לענות כרגע. ${err?.message||'נסה שוב בעוד רגע'}`;bot?.closest('.ai-msg')?.classList.add('error')}
- finally{bot?.closest('.ai-msg')?.classList.remove('typing');if(send)send.disabled=!window.FocusCloud?.snapshot?.().user;input?.focus()}
-}
-function bindAiChatView(){
- if(currentView!=='chat')return;
- $('#aiBack')?.addEventListener('click',()=>navigate('tools',false,'from-left'));
- $('#aiNewChat')?.addEventListener('click',()=>{if(confirm('לפתוח שיחה חדשה? השיחה הנוכחית תימחק מהמכשיר.')){clearAiChat();render()}});
- $$('[data-ai-starter]').forEach(b=>b.onclick=()=>sendAiMessage(b.dataset.aiStarter));
- const form=$('#aiComposer'),input=$('#aiInput');
- form?.addEventListener('submit',e=>{e.preventDefault();sendAiMessage(input?.value)});
- input?.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(120,input.scrollHeight)+'px'});
- input?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form?.requestSubmit()}});
- scrollAiBottom();
-}
-
 function toolsView(){
  const discreet=!!state.discreet;
  return `<section class="screen"><div class="reveal" ${delay(0)}><div class="eyebrow">ארגז כלים</div><h1 class="hero-title">לא צריך כוח רצון<br>לכל רגע.</h1><p class="hero-sub">מכינים מראש תגובה פשוטה לרגע שבו הראש מתחיל להתווכח.</p></div>
- <div class="section-head reveal" ${delay(1)}><h2>שיחה</h2></div><div class="tool-list"><button class="card tool reveal ai-tool" data-action="aiChat" ${delay(2)}><span class="tool-icon">${icon('chat')}</span><span><h3>צ׳אט AI לגמילה</h3><p>שיחה חופשית וממוקדת בתהליך שלך.</p></span><span class="arrow">‹</span></button></div><div class="section-head reveal" ${delay(2)}><h2>עזרה מיידית</h2></div><div class="tool-list">
+ <div class="section-head reveal" ${delay(1)}><h2>עזרה מיידית</h2></div><div class="tool-list">
  ${tool('wave',discreet?'פוקוס 90':'גל דחף','90 שניות של נשימה והשהיה.','sos',2)}${tool('bolt',discreet?'מפת דפוסים':'מפת טריגרים',discreet?'רשום מה קרה ומה עזר לך לחזור למסלול.':'רשום מה הפעיל אותך ומה עזרת לעצמך לעשות.','trigger',3)}${tool('journal','יומן','שמור משפט או מחשבה לפני שהיא נתקעת בראש.','journal',4)}${tool('target',discreet?'העוגן שלי':'הסיבה שלי','המשפט שאתה רוצה לראות ברגע קשה.','why',5)}${tool('reset','התחלה מחדש',discreet?'פותחים רצף חדש בלי למחוק את מה שלמדת.':'אם הייתה נפילה, מתחילים מחדש בלי למחוק את מה שלמדת.','reset',6)}
  </div></section>`;
 }
@@ -699,7 +649,7 @@ function bindView(){
   if($('#cleanClock'))startHomeDynamics();
   $$('[data-sheet]').forEach(b=>b.onclick=()=>openSheet(b.dataset.sheet));
   $$('[data-go]').forEach(b=>b.onclick=()=>navigate(b.dataset.go));
-  $('[data-action]').forEach(b=>b.onclick=()=>b.dataset.action==='sos'?openSOS():b.dataset.action==='aiChat'?navigate('chat',false,'from-right'):openSheet(b.dataset.action));
+  $$('[data-action]').forEach(b=>b.onclick=()=>b.dataset.action==='sos'?openSOS():openSheet(b.dataset.action));
   $$('[data-day]').forEach(b=>b.onclick=()=>{const n=+b.dataset.day;if(n>streak())return toast('היום הזה עדיין נעול');openDay(n)});
   $$('[data-stats]').forEach(b=>b.onclick=()=>{$$('[data-stats]').forEach(x=>x.classList.toggle('active',x===b));$('#statsBody').innerHTML=b.dataset.stats==='triggers'?statsTriggers():b.dataset.stats==='slips'?statsSlips():b.dataset.stats==='weekly'?statsWeekly():statsOverview();bindStatsBody();haptic(7)});
   $('#notifToggle')?.addEventListener('click',()=>{state.notifications=!state.notifications;save();render();toast(state.notifications?'תזכורת יומית הופעלה':'תזכורת יומית כובתה')});
@@ -710,7 +660,6 @@ function bindView(){
   $('#cloudLogoutBtn')?.addEventListener('click',async()=>{const b=$('#cloudLogoutBtn');if(b)b.disabled=true;try{await window.FocusCloud?.logout?.();localStorage.removeItem('reset90-auth-local-ok');localStorage.removeItem('reset90-auth-signed-in');toast('התנתקת. הנתונים המקומיים נשארו במכשיר');openDedicatedAuth('login')}catch(e){toast(e.message||'ההתנתקות נכשלה')}finally{render()}});
   $('#exportBtn')?.addEventListener('click',exportData); $('#wipeBtn')?.addEventListener('click',()=>openSheet('wipe'));
   bindStatsBody();
-  bindAiChatView();
 }
 function bindStatsBody(){
   $('#openWeeklyReport')?.addEventListener('click',()=>{const tab=$('[data-stats="weekly"]');if(tab){tab.click();setTimeout(()=>$('#view')?.scrollTo({top:150,behavior:'smooth'}),40)}});
