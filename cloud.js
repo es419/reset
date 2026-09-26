@@ -73,6 +73,7 @@
     if (type.includes('user_email_already_exists')) return 'כבר קיים חשבון עם האימייל הזה';
     if (type.includes('general_argument_invalid')) return error?.message || 'אחד הפרטים שהוזנו אינו תקין';
     if (!navigator.onLine) return 'אין כרגע חיבור לאינטרנט. הנתונים נשמרו במכשיר';
+    if (error instanceof TypeError && /load failed|failed to fetch|network/i.test(String(error.message||''))) return 'לא ניתן להגיע ל-Appwrite. בדוק שחסימת DNS/VPN/Content Blocker לא חוסמת את fra.cloud.appwrite.io';
     return error?.message || 'הסנכרון נכשל';
   }
 
@@ -273,7 +274,7 @@
     if (!initSdk()) throw new Error('Appwrite SDK לא זמין');
     setCloudStatus('connecting');
     try {
-      await account.createEmailPasswordSession(String(email).trim(), password);
+      await account.createEmailPasswordSession({ email: String(email).trim(), password });
       await refreshUser();
       await syncInitial();
       return snapshot();
@@ -287,12 +288,12 @@
     if (!initSdk()) throw new Error('Appwrite SDK לא זמין');
     setCloudStatus('connecting');
     try {
-      await account.create(
-        Appwrite.ID.unique(),
-        String(email).trim(),
+      await account.create({
+        userId: Appwrite.ID.unique(),
+        email: String(email).trim(),
         password,
-        String(name || '').trim()
-      );
+        name: String(name || '').trim()
+      });
       await account.createEmailPasswordSession({ email: String(email).trim(), password });
       await refreshUser();
       await syncInitial();
