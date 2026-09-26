@@ -14,7 +14,7 @@
   <title>פוקוס — מעקב אישי</title>
 </head>
 <body>
-  <section id="authGate" class="auth-gate" aria-live="polite">
+  <section id="authGate" class="auth-gate hidden" aria-live="polite">
     <div class="auth-bg auth-bg-a"></div>
     <div class="auth-bg auth-bg-b"></div>
     <div class="auth-panel">
@@ -54,21 +54,7 @@
   <div id="privacyCover" class="privacy-cover" aria-hidden="true"><div class="privacy-logo"><span class="brand-mark">◌</span><b>פוקוס</b><small>מעקב אישי</small></div></div>
   <div id="confetti" class="confetti-layer" aria-hidden="true"></div>
 
-  <script>
-    window.__focusAppwriteReady = new Promise(resolve => {
-      if (window.Appwrite) return resolve(true);
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/appwrite@23.0.0';
-      script.async = true;
-      let settled = false;
-      const finish = ok => { if (!settled) { settled = true; resolve(ok); } };
-      script.onload = () => finish(true);
-      script.onerror = () => finish(false);
-      document.head.appendChild(script);
-      setTimeout(() => finish(!!window.Appwrite), 8000);
-    });
-  </script>
-  <script src="cloud.js?v=32" defer></script>
-  <script src="app.js?v=34" defer></script>
+  <script src="cloud.js?v=33" defer></script>
+  <script src="app.js?v=35" defer></script>
 </body>
 </html>
