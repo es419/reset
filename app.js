@@ -546,6 +546,10 @@ function setAuthGateVisible(show){
  gate.classList.toggle('hidden',!show);
  document.body.classList.toggle('auth-open',show);
 }
+function renderAuthBoot(){
+ const host=$('#authGateBody');if(!host)return;
+ host.innerHTML=`<div class="auth-boot"><div class="auth-boot-ring"></div><b>מחבר את החשבון שלך…</b><span>רק רגע</span></div>`;
+}
 function authGateTemplate(mode='login'){
  const register=mode==='register';
  return `<div class="auth-copy"><div class="auth-eyebrow">${register?'חשבון חדש':'ברוך הבא'}</div><h1>${register?'יוצרים חשבון.':'ממשיכים מאיפה שעצרת.'}</h1><p>${register?'המידע שכבר נמצא במכשיר יתחבר לחשבון ויישמר גם בענן.':'התחבר כדי להחזיר את הנתונים שלך ולסנכרן אותם בין מכשירים.'}</p></div>
@@ -576,6 +580,7 @@ function renderAuthGate(mode='login'){
      if(register)await window.FocusCloud.register(email,password,name);
      else await window.FocusCloud.login(email,password);
      localStorage.removeItem('reset90-auth-local-ok');
+     localStorage.setItem('reset90-auth-signed-in','1');
      setAuthGateVisible(false);
      render();
      toast(register?'החשבון נוצר והנתונים סונכרנו':'התחברת והנתונים סונכרנו');
@@ -598,7 +603,9 @@ async function initDedicatedAuth(){
      renderAuthGate(tab.dataset.authMode);
    });
  }
- renderAuthGate('login');
+ const choseLocal=localStorage.getItem('reset90-auth-local-ok')==='1';
+ if(choseLocal){setAuthGateVisible(false)}
+ else{renderAuthBoot();setAuthGateVisible(true)}
  const snap=await window.FocusCloud?.init?.({
    getState:()=>state,
    applyState:(incoming)=>{
@@ -610,9 +617,17 @@ async function initDedicatedAuth(){
      render();
    }
  });
- if(snap?.user){setAuthGateVisible(false);return}
- const choseLocal=localStorage.getItem('reset90-auth-local-ok')==='1';
- setAuthGateVisible(!choseLocal);
+ if(snap?.user){
+   localStorage.setItem('reset90-auth-signed-in','1');
+   localStorage.removeItem('reset90-auth-local-ok');
+   setAuthGateVisible(false);
+   return;
+ }
+ localStorage.removeItem('reset90-auth-signed-in');
+ if(!choseLocal){
+   renderAuthGate('login');
+   setAuthGateVisible(true);
+ }
 }
 
 function settingsView(){
@@ -642,7 +657,7 @@ function bindView(){
   $('#themeSetting')?.addEventListener('click',()=>{setTheme(state.theme==='dark'?'light':'dark');render()});
   $('#showAuthGateBtn')?.addEventListener('click',()=>openDedicatedAuth('login'));
   $('#cloudSyncBtn')?.addEventListener('click',async()=>{const b=$('#cloudSyncBtn');if(b)b.disabled=true;try{await window.FocusCloud?.syncNow?.();toast('הנתונים סונכרנו ✓')}catch(e){toast(e.message||'הסנכרון נכשל')}finally{if(currentView==='settings')render()}});
-  $('#cloudLogoutBtn')?.addEventListener('click',async()=>{const b=$('#cloudLogoutBtn');if(b)b.disabled=true;try{await window.FocusCloud?.logout?.();localStorage.removeItem('reset90-auth-local-ok');toast('התנתקת. הנתונים המקומיים נשארו במכשיר');openDedicatedAuth('login')}catch(e){toast(e.message||'ההתנתקות נכשלה')}finally{render()}});
+  $('#cloudLogoutBtn')?.addEventListener('click',async()=>{const b=$('#cloudLogoutBtn');if(b)b.disabled=true;try{await window.FocusCloud?.logout?.();localStorage.removeItem('reset90-auth-local-ok');localStorage.removeItem('reset90-auth-signed-in');toast('התנתקת. הנתונים המקומיים נשארו במכשיר');openDedicatedAuth('login')}catch(e){toast(e.message||'ההתנתקות נכשלה')}finally{render()}});
   $('#exportBtn')?.addEventListener('click',exportData); $('#wipeBtn')?.addEventListener('click',()=>openSheet('wipe'));
   bindStatsBody();
 }
