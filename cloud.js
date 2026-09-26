@@ -314,6 +314,13 @@
     setCloudStatus('local');
   }
 
+  async function getJWT() {
+    if (!account || !currentUser) throw new Error('צריך להתחבר לחשבון קודם');
+    const token = await account.createJWT();
+    if (!token?.jwt) throw new Error('לא ניתן ליצור אסימון התחברות');
+    return token.jwt;
+  }
+
   async function syncNow() {
     if (!currentUser) throw new Error('צריך להתחבר לחשבון קודם');
     await syncInitial();
@@ -346,6 +353,7 @@
     login,
     register,
     logout,
+    getJWT,
     syncNow,
     scheduleSync,
     mergeStates
