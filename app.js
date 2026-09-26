@@ -537,7 +537,7 @@ function setAuthGateVisible(show){
 function authGateTemplate(mode='login'){
  const register=mode==='register';
  return `<div class="auth-copy"><div class="auth-eyebrow">${register?'חשבון חדש':'ברוך הבא'}</div><h1>${register?'יוצרים חשבון.':'ממשיכים מאיפה שעצרת.'}</h1><p>${register?'המידע שכבר נמצא במכשיר יתחבר לחשבון ויישמר גם בענן.':'התחבר כדי להחזיר את הנתונים שלך ולסנכרן אותם בין מכשירים.'}</p></div>
- <div class="auth-tabs"><button class="${!register?'active':''}" data-auth-mode="login">התחברות</button><button class="${register?'active':''}" data-auth-mode="register">הרשמה</button></div>
+ <div class="auth-tabs"><button type="button" class="${!register?'active':''}" data-auth-mode="login">התחברות</button><button type="button" class="${register?'active':''}" data-auth-mode="register">הרשמה</button></div>
  <form class="auth-form" id="authGateForm">
    ${register?'<label><span>שם</span><input id="gateName" type="text" autocomplete="name" placeholder="איך לקרוא לך?"></label>':''}
    <label><span>אימייל</span><input id="gateEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" required></label>
@@ -551,7 +551,6 @@ function authGateTemplate(mode='login'){
 function renderAuthGate(mode='login'){
  const host=$('#authGateBody');if(!host)return;
  host.innerHTML=authGateTemplate(mode);
- host.querySelectorAll('[data-auth-mode]').forEach(b=>b.onclick=()=>renderAuthGate(b.dataset.authMode));
  $('#continueLocalBtn',host).onclick=()=>{setAuthGateVisible(false);localStorage.setItem('reset90-auth-local-ok','1')};
  $('#authGateForm',host).onsubmit=async e=>{
    e.preventDefault();
@@ -576,6 +575,17 @@ function renderAuthGate(mode='login'){
 }
 function openDedicatedAuth(mode='login'){renderAuthGate(mode);setAuthGateVisible(true);}
 async function initDedicatedAuth(){
+ const authHost=$('#authGateBody');
+ if(authHost&&!authHost.dataset.tabsBound){
+   authHost.dataset.tabsBound='1';
+   authHost.addEventListener('click',e=>{
+     const tab=e.target.closest('[data-auth-mode]');
+     if(!tab||!authHost.contains(tab))return;
+     e.preventDefault();
+     e.stopPropagation();
+     renderAuthGate(tab.dataset.authMode);
+   });
+ }
  renderAuthGate('login');
  const snap=await window.FocusCloud?.init?.({
    getState:()=>state,
