@@ -1,5 +1,5 @@
-const CACHE='reset90-v38';
-const ASSETS=['./index.html','./styles.css?v=31','./cloud.js?v=33','./app.js?v=38','./manifest.webmanifest','./icons/icon-192.png?v=7','./icons/icon-512.png?v=7'];
+const CACHE='reset90-v39';
+const ASSETS=['./index.html','./styles.css?v=31','./cloud.js?v=33','./app.js?v=39','./manifest.webmanifest','./icons/icon-192.png?v=7','./icons/icon-512.png?v=7'];
 
 self.addEventListener('install',event=>{
   event.waitUntil(

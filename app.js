@@ -369,7 +369,7 @@ function navigate(v,push=true,direction=''){
 function render(){
   clearInterval(homeClockTimer); clearInterval(quoteTimer); homeClockTimer=null; quoteTimer=null;
   updateBest(); const view=$('#view'); view.scrollTop=0;
-  $('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===currentView));
+  $$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===currentView));
   $('#sosFloat')?.classList.toggle('hide',currentView==='stats');
   view.innerHTML=({home:homeView,journey:journeyView,stats:statsView,tools:toolsView,settings:settingsView}[currentView]||homeView)();
   const screen=$('.screen',view); if(screen&&transitionClass)screen.classList.add(transitionClass); transitionClass=''; applyDiscreetMode(); bindView();
