@@ -521,11 +521,76 @@ function cloudSettingsBlock(){
  <div class="card reveal cloud-card ${cloud.status==='error'?'cloud-error':''}" ${delay(4)}>
    <div class="cloud-account-head">
      <span class="cloud-orb">${icon(user?'check':'spark')}</span>
-     <div><b>${user?'הגיבוי בענן פעיל':'גיבוי וסנכרון בין מכשירים'}</b><p>${user?esc(user.email):'Appwrite · המקומי נשאר זמין גם בלי אינטרנט'}</p></div>
+     <div><b>${user?'הגיבוי בענן פעיל':'עובד במצב מקומי'}</b><p>${user?esc(user.email):'אפשר להתחבר בכל שלב כדי לגבות ולסנכרן בין מכשירים'}</p></div>
    </div>
    <div class="cloud-status"><i class="${cloud.status==='syncing'||cloud.status==='connecting'?'busy':user?'online':''}"></i><span>${esc(cloudStatusText(cloud))}</span></div>
-   ${user?`<div class="cloud-actions"><button class="secondary-btn" id="cloudSyncBtn">סנכרן עכשיו</button><button class="secondary-btn cloud-logout" id="cloudLogoutBtn">התנתק</button></div>`:`<button class="primary-btn" id="cloudConnectBtn">התחבר או הירשם</button>`}
+   ${user?`<div class="cloud-actions"><button class="secondary-btn" id="cloudSyncBtn">סנכרן עכשיו</button><button class="secondary-btn cloud-logout" id="cloudLogoutBtn">התנתק</button></div>`:`<button class="secondary-btn" id="showAuthGateBtn">פתח מסך התחברות</button>`}
  </div>`;
+}
+
+function setAuthGateVisible(show){
+ const gate=$('#authGate');
+ if(!gate)return;
+ gate.classList.toggle('hidden',!show);
+ document.body.classList.toggle('auth-open',show);
+}
+function authGateTemplate(mode='login'){
+ const register=mode==='register';
+ return `<div class="auth-copy"><div class="auth-eyebrow">${register?'חשבון חדש':'ברוך הבא'}</div><h1>${register?'יוצרים חשבון.':'ממשיכים מאיפה שעצרת.'}</h1><p>${register?'המידע שכבר נמצא במכשיר יתחבר לחשבון ויישמר גם בענן.':'התחבר כדי להחזיר את הנתונים שלך ולסנכרן אותם בין מכשירים.'}</p></div>
+ <div class="auth-tabs"><button class="${!register?'active':''}" data-auth-mode="login">התחברות</button><button class="${register?'active':''}" data-auth-mode="register">הרשמה</button></div>
+ <form class="auth-form" id="authGateForm">
+   ${register?'<label><span>שם</span><input id="gateName" type="text" autocomplete="name" placeholder="איך לקרוא לך?"></label>':''}
+   <label><span>אימייל</span><input id="gateEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" required></label>
+   <label><span>סיסמה</span><input id="gatePassword" type="password" autocomplete="${register?'new-password':'current-password'}" minlength="8" placeholder="לפחות 8 תווים" required></label>
+   <div class="auth-error" id="authGateError"></div>
+   <button class="primary-btn auth-submit" type="submit" id="authGateSubmit">${register?'צור חשבון והמשך':'התחבר והמשך'}</button>
+ </form>
+ <button class="auth-local" id="continueLocalBtn">המשך בלי חשבון במכשיר הזה</button>
+ <p class="auth-note">גם במצב מקומי האפליקציה ממשיכה לעבוד כרגיל. אפשר להתחבר אחר כך דרך ההגדרות.</p>`;
+}
+function renderAuthGate(mode='login'){
+ const host=$('#authGateBody');if(!host)return;
+ host.innerHTML=authGateTemplate(mode);
+ $('[data-auth-mode]',host).forEach(b=>b.onclick=()=>renderAuthGate(b.dataset.authMode));
+ $('#continueLocalBtn',host).onclick=()=>{setAuthGateVisible(false);localStorage.setItem('reset90-auth-local-ok','1')};
+ $('#authGateForm',host).onsubmit=async e=>{
+   e.preventDefault();
+   const register=mode==='register';
+   const email=$('#gateEmail',host).value.trim(),password=$('#gatePassword',host).value,name=$('#gateName',host)?.value.trim()||'';
+   const err=$('#authGateError',host),btn=$('#authGateSubmit',host);
+   if(!email||!password){err.textContent='מלא אימייל וסיסמה';return}
+   if(password.length<8){err.textContent='הסיסמה צריכה להכיל לפחות 8 תווים';return}
+   btn.disabled=true;btn.textContent=register?'יוצר חשבון…':'מתחבר…';err.textContent='';
+   try{
+     if(register)await window.FocusCloud.register(email,password,name);
+     else await window.FocusCloud.login(email,password);
+     localStorage.removeItem('reset90-auth-local-ok');
+     setAuthGateVisible(false);
+     render();
+     toast(register?'החשבון נוצר והנתונים סונכרנו':'התחברת והנתונים סונכרנו');
+   }catch(error){
+     err.textContent=error.message||'הפעולה נכשלה';
+     btn.disabled=false;btn.textContent=register?'צור חשבון והמשך':'התחבר והמשך';
+   }
+ };
+}
+function openDedicatedAuth(mode='login'){renderAuthGate(mode);setAuthGateVisible(true);}
+async function initDedicatedAuth(){
+ renderAuthGate('login');
+ const snap=await window.FocusCloud?.init?.({
+   getState:()=>state,
+   applyState:(incoming)=>{
+     state={...freshState(),...(incoming||{})};
+     localStorage.setItem(KEY,JSON.stringify(state));
+     currentView=state.currentView||currentView||'home';
+     setTheme(state.theme||'dark');
+     applyDiscreetMode();
+     render();
+   }
+ });
+ if(snap?.user){setAuthGateVisible(false);return}
+ const choseLocal=localStorage.getItem('reset90-auth-local-ok')==='1';
+ setAuthGateVisible(!choseLocal);
 }
 
 function settingsView(){
@@ -553,9 +618,9 @@ function bindView(){
   $('#notifToggle')?.addEventListener('click',()=>{state.notifications=!state.notifications;save();render();toast(state.notifications?'תזכורת יומית הופעלה':'תזכורת יומית כובתה')});
   $('#discreetToggle')?.addEventListener('click',()=>{state.discreet=!state.discreet;save();applyDiscreetMode();render();toast(state.discreet?'מצב דיסקרטי הופעל':'מצב דיסקרטי כובה')});
   $('#themeSetting')?.addEventListener('click',()=>{setTheme(state.theme==='dark'?'light':'dark');render()});
-  $('#cloudConnectBtn')?.addEventListener('click',()=>openSheet('account'));
+  $('#showAuthGateBtn')?.addEventListener('click',()=>openDedicatedAuth('login'));
   $('#cloudSyncBtn')?.addEventListener('click',async()=>{const b=$('#cloudSyncBtn');if(b)b.disabled=true;try{await window.FocusCloud?.syncNow?.();toast('הנתונים סונכרנו ✓')}catch(e){toast(e.message||'הסנכרון נכשל')}finally{if(currentView==='settings')render()}});
-  $('#cloudLogoutBtn')?.addEventListener('click',async()=>{const b=$('#cloudLogoutBtn');if(b)b.disabled=true;try{await window.FocusCloud?.logout?.();toast('התנתקת. הנתונים המקומיים נשארו במכשיר')}catch(e){toast(e.message||'ההתנתקות נכשלה')}finally{render()}});
+  $('#cloudLogoutBtn')?.addEventListener('click',async()=>{const b=$('#cloudLogoutBtn');if(b)b.disabled=true;try{await window.FocusCloud?.logout?.();localStorage.removeItem('reset90-auth-local-ok');toast('התנתקת. הנתונים המקומיים נשארו במכשיר');openDedicatedAuth('login')}catch(e){toast(e.message||'ההתנתקות נכשלה')}finally{render()}});
   $('#exportBtn')?.addEventListener('click',exportData); $('#wipeBtn')?.addEventListener('click',()=>openSheet('wipe'));
   bindStatsBody();
 }
@@ -599,13 +664,11 @@ function sheetContent(type,data={}){
  if(type==='reset')return `${grab}<h2>${discreet?'להתחיל מחדש?':'לרשום נפילה ולהתחיל מחדש?'}</h2><p class="sub">${discreet?'האיפוס יישמר בהיסטוריה עם היום והשעה, כדי לזהות דפוסים חוזרים.':'האיפוס יירשם כנפילה עם היום והשעה. האפליקציה תשתמש בהיסטוריה כדי ללמוד מתי ומה נוטה להקדים נפילות.'} השעון יחזור מיד ל־00:00:00; שאר הנתונים נשמרים.</p><button class="danger-btn" id="confirmReset">${discreet?'אפס והתחל מחדש':'רשום נפילה והתחל מחדש'}</button><div style="height:9px"></div><button class="secondary-btn" id="cancelSheet">ביטול</button>`;
  if(type==='startdate')return `${grab}<h2>תאריך התחלה</h2><p class="sub">אפשר לעדכן אם התחלת לפני שהתקנת את האפליקציה.</p><input type="date" id="startDateInput" value="${state.startDate}" max="${todayISO()}"><div style="height:12px"></div><button class="primary-btn" id="saveStartDate">שמור</button>`;
  if(type==='wipe')return `${grab}<h2>לאפס את כל הנתונים?</h2><p class="sub">הפעולה מוחקת רצפים, צ׳ק־אינים, ${discreet?'דפוסים':'טריגרים'} ויומן מהמכשיר הזה.</p><button class="danger-btn" id="confirmWipe">מחק הכל</button><div style="height:9px"></div><button class="secondary-btn" id="cancelSheet">ביטול</button>`;
- if(type==='account')return `${grab}<div id="accountSheet"></div>`;
  if(type==='day')return `${grab}<div class="eyebrow">יום ${data.n}</div><h2>${esc(data.t)}</h2><p class="sub">${esc(data.d)}</p><button class="secondary-btn" id="cancelSheet">סגור</button>`;
  return `${grab}<h2>בקרוב</h2>`;
 }
 function bindSheet(type){
  $('#sheetBackdrop').onclick=()=>closeSheet();$('#cancelSheet')?.addEventListener('click',()=>closeSheet());
- if(type==='account'){renderAccountSheet('login');}
 
  if(type==='checkin'){
   let mood='בסדר';const choices=$$('#moods .choice');choices[1]?.classList.add('selected');choices.forEach(b=>b.onclick=()=>{choices.forEach(x=>x.classList.remove('selected'));b.classList.add('selected');mood=b.textContent;haptic(6)});
@@ -618,34 +681,6 @@ function bindSheet(type){
  if(type==='reset')$('#confirmReset').onclick=()=>{const now=new Date();const ms=elapsedMs();const prior=priorUrgeForSlip(now.toISOString());state.slips.push({date:now.toISOString(),localDate:localISO(now),localHour:now.getHours(),weekday:now.getDay(),triggerBefore:prior?.trigger||null,streak:streak(),elapsedMs:ms});state.bestMs=Math.max(state.bestMs||0,ms);state.best=Math.max(state.best||0,streak());state.resetAt=now.toISOString();state.startDate=todayISO();save();closeSheet();haptic([18,28,18]);render();toast(state.discreet?'ההתחלה מחדש נשמרה':'הנפילה נרשמה והשעון התחיל מחדש')};
  if(type==='startdate')$('#saveStartDate').onclick=()=>{state.startDate=$('#startDateInput').value||todayISO();const d=new Date(`${state.startDate}T00:00:00`);state.resetAt=(Number.isNaN(d.getTime())?new Date():d).toISOString();save();closeSheet();render();toast('תאריך ההתחלה עודכן')};
  if(type==='wipe')$('#confirmWipe').onclick=()=>{localStorage.removeItem(KEY);localStorage.removeItem('reset90-state-v2');localStorage.removeItem('reset90-state-v1');state=freshState();setTheme('dark');closeSheet();navigate('home',false);toast('הנתונים אופסו')};
-}
-
-function renderAccountSheet(mode='login'){
- const host=$('#accountSheet');if(!host)return;
- const isRegister=mode==='register';
- host.innerHTML=`<div class="coach-head account-head"><span class="coach-step">Appwrite Cloud</span><h2>${isRegister?'יצירת חשבון':'כניסה לחשבון'}</h2><p class="sub">${isRegister?'הנתונים שכבר נמצאים במכשיר יעלו אוטומטית לחשבון החדש.':'אחרי הכניסה נחבר את הנתונים המקומיים לענן בלי למחוק היסטוריה.'}</p></div>
- <div class="account-form">
-   ${isRegister?'<label>שם<input id="accountName" type="text" autocomplete="name" placeholder="השם שלך"></label>':''}
-   <label>אימייל<input id="accountEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com"></label>
-   <label>סיסמה<input id="accountPassword" type="password" autocomplete="${isRegister?'new-password':'current-password'}" minlength="8" placeholder="לפחות 8 תווים"></label>
-   <div class="account-error" id="accountError"></div>
-   <button class="primary-btn" id="accountSubmit">${isRegister?'צור חשבון וסנכרן':'התחבר וסנכרן'}</button>
-   <button class="coach-link" id="accountSwitch">${isRegister?'יש לי כבר חשבון — התחבר':'אין לי חשבון — הירשם'}</button>
- </div>`;
- enableSheetDrag();
- $('#accountSwitch').onclick=()=>renderAccountSheet(isRegister?'login':'register');
- $('#accountSubmit').onclick=async()=>{
-   const email=$('#accountEmail').value.trim(),password=$('#accountPassword').value,name=$('#accountName')?.value.trim()||'';
-   const err=$('#accountError'),btn=$('#accountSubmit');
-   if(!email||!password){err.textContent='מלא אימייל וסיסמה';return}
-   if(password.length<8){err.textContent='הסיסמה צריכה להכיל לפחות 8 תווים';return}
-   btn.disabled=true;btn.textContent=isRegister?'יוצר חשבון…':'מתחבר…';err.textContent='';
-   try{
-     if(isRegister)await window.FocusCloud.register(email,password,name);
-     else await window.FocusCloud.login(email,password);
-     closeSheet();render();toast(isRegister?'החשבון נוצר והנתונים סונכרנו':'התחברת והנתונים סונכרנו');
-   }catch(e){err.textContent=e.message||'הפעולה נכשלה';btn.disabled=false;btn.textContent=isRegister?'צור חשבון וסנכרן':'התחבר וסנכרן'}
- };
 }
 
 function startAdaptiveUrgeFlow(){
@@ -870,17 +905,7 @@ $('#view').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-
 advanceQuote();
 render();
 window.addEventListener('focus-cloud-status',()=>{if(currentView==='settings'&&!$('#sheet')?.classList.contains('hidden'))return;if(currentView==='settings')render()});
-window.FocusCloud?.init?.({
-  getState:()=>state,
-  applyState:(incoming)=>{
-    state={...freshState(),...(incoming||{})};
-    localStorage.setItem(KEY,JSON.stringify(state));
-    currentView=state.currentView||currentView||'home';
-    setTheme(state.theme||'dark');
-    applyDiscreetMode();
-    render();
-  }
-});
+initDedicatedAuth();
 document.addEventListener('visibilitychange',()=>{const cover=$('#privacyCover');if(!cover)return;if(document.hidden&&state.discreet)cover.classList.add('show');else if(!document.hidden)setTimeout(()=>cover.classList.remove('show'),90)});
 window.addEventListener('pagehide',()=>{if(state.discreet)$('#privacyCover')?.classList.add('show')});
 window.addEventListener('pageshow',()=>$('#privacyCover')?.classList.remove('show'));
