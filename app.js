@@ -25,7 +25,7 @@ function load(){
     return data;
   }catch{return freshState();}
 }
-function save(){ localStorage.setItem(KEY,JSON.stringify(state)); }
+function save(){ localStorage.setItem(KEY,JSON.stringify(state)); window.FocusCloud?.scheduleSync?.(state); }
 function resetTimestamp(){
   const ts=Date.parse(state.resetAt||'');
   if(Number.isFinite(ts)) return ts;
@@ -507,6 +507,27 @@ function toolsView(){
 }
 function tool(ic,t,d,a,i){return `<button class="card tool reveal" data-action="${a}" ${delay(i)}><span class="tool-icon">${icon(ic)}</span><span><h3>${t}</h3><p>${d}</p></span><span class="arrow">‹</span></button>`;}
 
+function cloudSnapshot(){return window.FocusCloud?.snapshot?.()||{ready:false,status:'local',user:null,lastSyncAt:null,error:null};}
+function cloudStatusText(cloud){
+ if(cloud.status==='syncing'||cloud.status==='connecting')return 'מסנכרן עכשיו…';
+ if(cloud.status==='error')return cloud.error||'שגיאת סנכרון';
+ if(cloud.status==='synced'&&cloud.lastSyncAt)return 'סונכרן '+new Date(cloud.lastSyncAt).toLocaleString('he-IL',{dateStyle:'short',timeStyle:'short'});
+ if(cloud.user)return 'מחובר · הנתונים מגובים ומסתנכרנים';
+ return 'הנתונים נשמרים כרגע רק במכשיר הזה';
+}
+function cloudSettingsBlock(){
+ const cloud=cloudSnapshot(),user=cloud.user;
+ return `<div class="section-head reveal" ${delay(3)}><h2>חשבון וסנכרון</h2></div>
+ <div class="card reveal cloud-card ${cloud.status==='error'?'cloud-error':''}" ${delay(4)}>
+   <div class="cloud-account-head">
+     <span class="cloud-orb">${icon(user?'check':'spark')}</span>
+     <div><b>${user?'הגיבוי בענן פעיל':'גיבוי וסנכרון בין מכשירים'}</b><p>${user?esc(user.email):'Appwrite · המקומי נשאר זמין גם בלי אינטרנט'}</p></div>
+   </div>
+   <div class="cloud-status"><i class="${cloud.status==='syncing'||cloud.status==='connecting'?'busy':user?'online':''}"></i><span>${esc(cloudStatusText(cloud))}</span></div>
+   ${user?`<div class="cloud-actions"><button class="secondary-btn" id="cloudSyncBtn">סנכרן עכשיו</button><button class="secondary-btn cloud-logout" id="cloudLogoutBtn">התנתק</button></div>`:`<button class="primary-btn" id="cloudConnectBtn">התחבר או הירשם</button>`}
+ </div>`;
+}
+
 function settingsView(){
  return `<section class="screen"><div class="reveal" ${delay(0)}><div class="eyebrow">הגדרות</div><h1 class="hero-title">המסע שלך,<br>בקצב שלך.</h1></div>
  <div class="section-head reveal" ${delay(1)}><h2>אפליקציה</h2></div><div class="card reveal" ${delay(2)}>
@@ -514,7 +535,8 @@ function settingsView(){
  <div class="setting-row"><div><b>מצב דיסקרטי</b><p>שם וניסוחים ניטרליים + מסך פרטיות כשעוברים לרקע</p></div><button class="toggle ${state.discreet?'on':''}" id="discreetToggle" aria-label="מצב דיסקרטי"><i></i></button></div>
  <div class="setting-row"><div><b>מצב תצוגה</b><p>${state.theme==='dark'?'כהה':'בהיר'}</p></div><button class="secondary-btn" style="width:auto;min-height:42px;padding:0 15px" id="themeSetting">החלף</button></div>
  <div class="setting-row"><div><b>תחילת הרצף</b><p>${new Date(resetTimestamp()).toLocaleString('he-IL',{dateStyle:'short',timeStyle:'short'})}</p></div><button class="secondary-btn" style="width:auto;min-height:42px;padding:0 15px" data-sheet="startdate">שנה</button></div></div>
- <div class="section-head reveal" ${delay(3)}><h2>הנתונים שלי</h2></div><div class="card reveal" ${delay(4)}><div class="setting-row"><div><b>ייצוא נתונים</b><p>קובץ JSON מקומי</p></div><button class="secondary-btn" style="width:auto;min-height:42px;padding:0 15px" id="exportBtn">ייצא</button></div><div class="setting-row"><div><b>מחיקת נתונים</b><p>איפוס מלא במכשיר הזה</p></div><button class="secondary-btn" style="width:auto;min-height:42px;padding:0 15px" id="wipeBtn">אפס</button></div></div>
+ ${cloudSettingsBlock()}
+ <div class="section-head reveal" ${delay(5)}><h2>הנתונים שלי</h2></div><div class="card reveal" ${delay(6)}><div class="setting-row"><div><b>ייצוא נתונים</b><p>קובץ JSON מקומי</p></div><button class="secondary-btn" style="width:auto;min-height:42px;padding:0 15px" id="exportBtn">ייצא</button></div><div class="setting-row"><div><b>מחיקת נתונים</b><p>איפוס מלא במכשיר הזה ובסנכרון הבא גם בענן</p></div><button class="secondary-btn" style="width:auto;min-height:42px;padding:0 15px" id="wipeBtn">אפס</button></div></div>
  </section>`;
 }
 
@@ -531,6 +553,9 @@ function bindView(){
   $('#notifToggle')?.addEventListener('click',()=>{state.notifications=!state.notifications;save();render();toast(state.notifications?'תזכורת יומית הופעלה':'תזכורת יומית כובתה')});
   $('#discreetToggle')?.addEventListener('click',()=>{state.discreet=!state.discreet;save();applyDiscreetMode();render();toast(state.discreet?'מצב דיסקרטי הופעל':'מצב דיסקרטי כובה')});
   $('#themeSetting')?.addEventListener('click',()=>{setTheme(state.theme==='dark'?'light':'dark');render()});
+  $('#cloudConnectBtn')?.addEventListener('click',()=>openSheet('account'));
+  $('#cloudSyncBtn')?.addEventListener('click',async()=>{const b=$('#cloudSyncBtn');if(b)b.disabled=true;try{await window.FocusCloud?.syncNow?.();toast('הנתונים סונכרנו ✓')}catch(e){toast(e.message||'הסנכרון נכשל')}finally{if(currentView==='settings')render()}});
+  $('#cloudLogoutBtn')?.addEventListener('click',async()=>{const b=$('#cloudLogoutBtn');if(b)b.disabled=true;try{await window.FocusCloud?.logout?.();toast('התנתקת. הנתונים המקומיים נשארו במכשיר')}catch(e){toast(e.message||'ההתנתקות נכשלה')}finally{render()}});
   $('#exportBtn')?.addEventListener('click',exportData); $('#wipeBtn')?.addEventListener('click',()=>openSheet('wipe'));
   bindStatsBody();
 }
@@ -574,11 +599,14 @@ function sheetContent(type,data={}){
  if(type==='reset')return `${grab}<h2>${discreet?'להתחיל מחדש?':'לרשום נפילה ולהתחיל מחדש?'}</h2><p class="sub">${discreet?'האיפוס יישמר בהיסטוריה עם היום והשעה, כדי לזהות דפוסים חוזרים.':'האיפוס יירשם כנפילה עם היום והשעה. האפליקציה תשתמש בהיסטוריה כדי ללמוד מתי ומה נוטה להקדים נפילות.'} השעון יחזור מיד ל־00:00:00; שאר הנתונים נשמרים.</p><button class="danger-btn" id="confirmReset">${discreet?'אפס והתחל מחדש':'רשום נפילה והתחל מחדש'}</button><div style="height:9px"></div><button class="secondary-btn" id="cancelSheet">ביטול</button>`;
  if(type==='startdate')return `${grab}<h2>תאריך התחלה</h2><p class="sub">אפשר לעדכן אם התחלת לפני שהתקנת את האפליקציה.</p><input type="date" id="startDateInput" value="${state.startDate}" max="${todayISO()}"><div style="height:12px"></div><button class="primary-btn" id="saveStartDate">שמור</button>`;
  if(type==='wipe')return `${grab}<h2>לאפס את כל הנתונים?</h2><p class="sub">הפעולה מוחקת רצפים, צ׳ק־אינים, ${discreet?'דפוסים':'טריגרים'} ויומן מהמכשיר הזה.</p><button class="danger-btn" id="confirmWipe">מחק הכל</button><div style="height:9px"></div><button class="secondary-btn" id="cancelSheet">ביטול</button>`;
+ if(type==='account')return `${grab}<div id="accountSheet"></div>`;
  if(type==='day')return `${grab}<div class="eyebrow">יום ${data.n}</div><h2>${esc(data.t)}</h2><p class="sub">${esc(data.d)}</p><button class="secondary-btn" id="cancelSheet">סגור</button>`;
  return `${grab}<h2>בקרוב</h2>`;
 }
 function bindSheet(type){
  $('#sheetBackdrop').onclick=()=>closeSheet();$('#cancelSheet')?.addEventListener('click',()=>closeSheet());
+ if(type==='account'){renderAccountSheet('login');}
+
  if(type==='checkin'){
   let mood='בסדר';const choices=$$('#moods .choice');choices[1]?.classList.add('selected');choices.forEach(b=>b.onclick=()=>{choices.forEach(x=>x.classList.remove('selected'));b.classList.add('selected');mood=b.textContent;haptic(6)});
   $('#urgeRange').oninput=e=>$('#urgeVal').textContent=e.target.value;
@@ -590,6 +618,34 @@ function bindSheet(type){
  if(type==='reset')$('#confirmReset').onclick=()=>{const now=new Date();const ms=elapsedMs();const prior=priorUrgeForSlip(now.toISOString());state.slips.push({date:now.toISOString(),localDate:localISO(now),localHour:now.getHours(),weekday:now.getDay(),triggerBefore:prior?.trigger||null,streak:streak(),elapsedMs:ms});state.bestMs=Math.max(state.bestMs||0,ms);state.best=Math.max(state.best||0,streak());state.resetAt=now.toISOString();state.startDate=todayISO();save();closeSheet();haptic([18,28,18]);render();toast(state.discreet?'ההתחלה מחדש נשמרה':'הנפילה נרשמה והשעון התחיל מחדש')};
  if(type==='startdate')$('#saveStartDate').onclick=()=>{state.startDate=$('#startDateInput').value||todayISO();const d=new Date(`${state.startDate}T00:00:00`);state.resetAt=(Number.isNaN(d.getTime())?new Date():d).toISOString();save();closeSheet();render();toast('תאריך ההתחלה עודכן')};
  if(type==='wipe')$('#confirmWipe').onclick=()=>{localStorage.removeItem(KEY);localStorage.removeItem('reset90-state-v2');localStorage.removeItem('reset90-state-v1');state=freshState();setTheme('dark');closeSheet();navigate('home',false);toast('הנתונים אופסו')};
+}
+
+function renderAccountSheet(mode='login'){
+ const host=$('#accountSheet');if(!host)return;
+ const isRegister=mode==='register';
+ host.innerHTML=`<div class="coach-head account-head"><span class="coach-step">Appwrite Cloud</span><h2>${isRegister?'יצירת חשבון':'כניסה לחשבון'}</h2><p class="sub">${isRegister?'הנתונים שכבר נמצאים במכשיר יעלו אוטומטית לחשבון החדש.':'אחרי הכניסה נחבר את הנתונים המקומיים לענן בלי למחוק היסטוריה.'}</p></div>
+ <div class="account-form">
+   ${isRegister?'<label>שם<input id="accountName" type="text" autocomplete="name" placeholder="השם שלך"></label>':''}
+   <label>אימייל<input id="accountEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com"></label>
+   <label>סיסמה<input id="accountPassword" type="password" autocomplete="${isRegister?'new-password':'current-password'}" minlength="8" placeholder="לפחות 8 תווים"></label>
+   <div class="account-error" id="accountError"></div>
+   <button class="primary-btn" id="accountSubmit">${isRegister?'צור חשבון וסנכרן':'התחבר וסנכרן'}</button>
+   <button class="coach-link" id="accountSwitch">${isRegister?'יש לי כבר חשבון — התחבר':'אין לי חשבון — הירשם'}</button>
+ </div>`;
+ enableSheetDrag();
+ $('#accountSwitch').onclick=()=>renderAccountSheet(isRegister?'login':'register');
+ $('#accountSubmit').onclick=async()=>{
+   const email=$('#accountEmail').value.trim(),password=$('#accountPassword').value,name=$('#accountName')?.value.trim()||'';
+   const err=$('#accountError'),btn=$('#accountSubmit');
+   if(!email||!password){err.textContent='מלא אימייל וסיסמה';return}
+   if(password.length<8){err.textContent='הסיסמה צריכה להכיל לפחות 8 תווים';return}
+   btn.disabled=true;btn.textContent=isRegister?'יוצר חשבון…':'מתחבר…';err.textContent='';
+   try{
+     if(isRegister)await window.FocusCloud.register(email,password,name);
+     else await window.FocusCloud.login(email,password);
+     closeSheet();render();toast(isRegister?'החשבון נוצר והנתונים סונכרנו':'התחברת והנתונים סונכרנו');
+   }catch(e){err.textContent=e.message||'הפעולה נכשלה';btn.disabled=false;btn.textContent=isRegister?'צור חשבון וסנכרן':'התחבר וסנכרן'}
+ };
 }
 
 function startAdaptiveUrgeFlow(){
@@ -813,6 +869,18 @@ $('#view').addEventListener('touchstart',e=>{touchStartX=e.changedTouches[0].cli
 $('#view').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-touchStartX,dy=e.changedTouches[0].clientY-touchStartY;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.2)return;const i=viewOrder.indexOf(currentView),next=dx>0?Math.min(viewOrder.length-1,i+1):Math.max(0,i-1);if(next!==i)navigate(viewOrder[next],true,dx>0?'from-left':'from-right')},{passive:true});
 advanceQuote();
 render();
+window.addEventListener('focus-cloud-status',()=>{if(currentView==='settings'&&!$('#sheet')?.classList.contains('hidden'))return;if(currentView==='settings')render()});
+window.FocusCloud?.init?.({
+  getState:()=>state,
+  applyState:(incoming)=>{
+    state={...freshState(),...(incoming||{})};
+    localStorage.setItem(KEY,JSON.stringify(state));
+    currentView=state.currentView||currentView||'home';
+    setTheme(state.theme||'dark');
+    applyDiscreetMode();
+    render();
+  }
+});
 document.addEventListener('visibilitychange',()=>{const cover=$('#privacyCover');if(!cover)return;if(document.hidden&&state.discreet)cover.classList.add('show');else if(!document.hidden)setTimeout(()=>cover.classList.remove('show'),90)});
 window.addEventListener('pagehide',()=>{if(state.discreet)$('#privacyCover')?.classList.add('show')});
 window.addEventListener('pageshow',()=>$('#privacyCover')?.classList.remove('show'));
