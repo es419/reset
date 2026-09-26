@@ -619,6 +619,7 @@ async function initDedicatedAuth(){
    });
  }
  const choseLocal=localStorage.getItem('reset90-auth-local-ok')==='1';
+ const wasSignedIn=localStorage.getItem('reset90-auth-signed-in')==='1';
  if(choseLocal){setAuthGateVisible(false)}
  else{renderAuthBoot();setAuthGateVisible(true)}
  const snap=await window.FocusCloud?.init?.({
@@ -635,6 +636,10 @@ async function initDedicatedAuth(){
  if(snap?.user){
    localStorage.setItem('reset90-auth-signed-in','1');
    localStorage.removeItem('reset90-auth-local-ok');
+   setAuthGateVisible(false);
+   return;
+ }
+ if(wasSignedIn && snap?.ready===false){
    setAuthGateVisible(false);
    return;
  }
