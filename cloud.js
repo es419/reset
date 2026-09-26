@@ -274,7 +274,7 @@
     if (!initSdk()) throw new Error('Appwrite SDK לא זמין');
     setCloudStatus('connecting');
     try {
-      await account.createEmailPasswordSession(String(email).trim(), password);
+      await account.createEmailPasswordSession({ email: String(email).trim(), password });
       await refreshUser();
       await syncInitial();
       return snapshot();
@@ -288,12 +288,12 @@
     if (!initSdk()) throw new Error('Appwrite SDK לא זמין');
     setCloudStatus('connecting');
     try {
-      await account.create(
-        Appwrite.ID.unique(),
-        String(email).trim(),
+      await account.create({
+        userId: Appwrite.ID.unique(),
+        email: String(email).trim(),
         password,
-        String(name || '').trim()
-      );
+        name: String(name || '').trim()
+      });
       await account.createEmailPasswordSession({ email: String(email).trim(), password });
       await refreshUser();
       await syncInitial();
@@ -308,11 +308,7 @@
     if (!account || !currentUser) return;
     clearTimeout(syncTimer);
     if (navigator.onLine) await pushState(getLocalState());
-    try {
-      await account.deleteSession({ sessionId: 'current' });
-    } catch (error) {
-      try { await account.deleteSession('current'); } catch {}
-    }
+    await account.deleteSession({ sessionId: 'current' });
     currentUser = null;
     cloudState.user = null;
     setCloudStatus('local');
