@@ -551,7 +551,7 @@ function authGateTemplate(mode='login'){
 function renderAuthGate(mode='login'){
  const host=$('#authGateBody');if(!host)return;
  host.innerHTML=authGateTemplate(mode);
- $('[data-auth-mode]',host).forEach(b=>b.onclick=()=>renderAuthGate(b.dataset.authMode));
+ host.querySelectorAll('[data-auth-mode]').forEach(b=>b.onclick=()=>renderAuthGate(b.dataset.authMode));
  $('#continueLocalBtn',host).onclick=()=>{setAuthGateVisible(false);localStorage.setItem('reset90-auth-local-ok','1')};
  $('#authGateForm',host).onsubmit=async e=>{
    e.preventDefault();
