@@ -529,7 +529,7 @@ function cloudStatusText(cloud){
 }
 function cloudSettingsBlock(){
  const cloud=cloudSnapshot(),user=cloud.user;
- return `<div class="section-head reveal" ${delay(3)}><h2>חשבון וסנכרון</h2></div>
+ return `<div id="cloudSettingsMount"><div class="section-head reveal" ${delay(3)}><h2>חשבון וסנכרון</h2></div>
  <div class="card reveal cloud-card ${cloud.status==='error'?'cloud-error':''}" ${delay(4)}>
    <div class="cloud-account-head">
      <span class="cloud-orb">${icon(user?'check':'spark')}</span>
@@ -537,7 +537,20 @@ function cloudSettingsBlock(){
    </div>
    <div class="cloud-status"><i class="${cloud.status==='syncing'||cloud.status==='connecting'?'busy':user?'online':''}"></i><span>${esc(cloudStatusText(cloud))}</span></div>
    ${user?`<div class="cloud-actions"><button class="secondary-btn" id="cloudSyncBtn">סנכרן עכשיו</button><button class="secondary-btn cloud-logout" id="cloudLogoutBtn">התנתק</button></div>`:`<button class="secondary-btn" id="showAuthGateBtn">פתח מסך התחברות</button>`}
- </div>`;
+ </div></div>`;
+}
+function bindCloudSettingsControls(){
+  $('#showAuthGateBtn')?.addEventListener('click',()=>openDedicatedAuth('login'));
+  $('#cloudSyncBtn')?.addEventListener('click',async()=>{const b=$('#cloudSyncBtn');if(b)b.disabled=true;try{await window.FocusCloud?.syncNow?.();toast('הנתונים סונכרנו ✓')}catch(e){toast(e.message||'הסנכרון נכשל')}finally{updateCloudSettingsUI()}});
+  $('#cloudLogoutBtn')?.addEventListener('click',async()=>{const b=$('#cloudLogoutBtn');if(b)b.disabled=true;try{await window.FocusCloud?.logout?.();localStorage.removeItem('reset90-auth-local-ok');localStorage.removeItem('reset90-auth-signed-in');toast('התנתקת. הנתונים המקומיים נשארו במכשיר');openDedicatedAuth('login')}catch(e){toast(e.message||'ההתנתקות נכשלה')}finally{updateCloudSettingsUI()}});
+}
+function updateCloudSettingsUI(){
+  if(currentView!=='settings')return;
+  const mount=$('#cloudSettingsMount');if(!mount)return;
+  const holder=document.createElement('div');holder.innerHTML=cloudSettingsBlock();
+  const next=holder.firstElementChild;if(!next)return;
+  mount.replaceWith(next);
+  bindCloudSettingsControls();
 }
 
 function setAuthGateVisible(show){
@@ -655,9 +668,7 @@ function bindView(){
   $('#notifToggle')?.addEventListener('click',()=>{state.notifications=!state.notifications;save();render();toast(state.notifications?'תזכורת יומית הופעלה':'תזכורת יומית כובתה')});
   $('#discreetToggle')?.addEventListener('click',()=>{state.discreet=!state.discreet;save();applyDiscreetMode();render();toast(state.discreet?'מצב דיסקרטי הופעל':'מצב דיסקרטי כובה')});
   $('#themeSetting')?.addEventListener('click',()=>{setTheme(state.theme==='dark'?'light':'dark');render()});
-  $('#showAuthGateBtn')?.addEventListener('click',()=>openDedicatedAuth('login'));
-  $('#cloudSyncBtn')?.addEventListener('click',async()=>{const b=$('#cloudSyncBtn');if(b)b.disabled=true;try{await window.FocusCloud?.syncNow?.();toast('הנתונים סונכרנו ✓')}catch(e){toast(e.message||'הסנכרון נכשל')}finally{if(currentView==='settings')render()}});
-  $('#cloudLogoutBtn')?.addEventListener('click',async()=>{const b=$('#cloudLogoutBtn');if(b)b.disabled=true;try{await window.FocusCloud?.logout?.();localStorage.removeItem('reset90-auth-local-ok');localStorage.removeItem('reset90-auth-signed-in');toast('התנתקת. הנתונים המקומיים נשארו במכשיר');openDedicatedAuth('login')}catch(e){toast(e.message||'ההתנתקות נכשלה')}finally{render()}});
+  bindCloudSettingsControls();
   $('#exportBtn')?.addEventListener('click',exportData); $('#wipeBtn')?.addEventListener('click',()=>openSheet('wipe'));
   bindStatsBody();
 }
@@ -954,7 +965,7 @@ $('#view').addEventListener('touchstart',e=>{touchStartX=e.changedTouches[0].cli
 $('#view').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-touchStartX,dy=e.changedTouches[0].clientY-touchStartY;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.2)return;const i=viewOrder.indexOf(currentView),next=dx>0?Math.min(viewOrder.length-1,i+1):Math.max(0,i-1);if(next!==i)navigate(viewOrder[next],true,dx>0?'from-left':'from-right')},{passive:true});
 advanceQuote();
 render();
-window.addEventListener('focus-cloud-status',()=>{if(currentView==='settings'&&!$('#sheet')?.classList.contains('hidden'))return;if(currentView==='settings')render()});
+window.addEventListener('focus-cloud-status',()=>{if(currentView==='settings')updateCloudSettingsUI()});
 initDedicatedAuth();
 document.addEventListener('visibilitychange',()=>{const cover=$('#privacyCover');if(!cover)return;if(document.hidden&&state.discreet)cover.classList.add('show');else if(!document.hidden)setTimeout(()=>cover.classList.remove('show'),90)});
 window.addEventListener('pagehide',()=>{if(state.discreet)$('#privacyCover')?.classList.add('show')});
