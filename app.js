@@ -977,4 +977,4 @@ initDedicatedAuth();
 document.addEventListener('visibilitychange',()=>{const cover=$('#privacyCover');if(!cover)return;if(document.hidden&&state.discreet)cover.classList.add('show');else if(!document.hidden)setTimeout(()=>cover.classList.remove('show'),90)});
 window.addEventListener('pagehide',()=>{if(state.discreet)$('#privacyCover')?.classList.add('show')});
 window.addEventListener('pageshow',()=>$('#privacyCover')?.classList.remove('show'));
-if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=36',{updateViaCache:'none'});await reg.update()}catch{}});
