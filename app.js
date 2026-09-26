@@ -459,8 +459,8 @@ function startHomeDynamics(){
     el.classList.add('quote-out');
     setTimeout(()=>{if(!$('#motiveQuote'))return;el.textContent=advanceQuote();el.classList.remove('quote-out');el.classList.add('quote-in');setTimeout(()=>el.classList.remove('quote-in'),430);},190);
   };
-  updateClock();homeClockTimer=setInterval(updateClock,1000);quoteTimer=setInterval(rotate,12000);
-  $('#nextQuote')?.addEventListener('click',()=>{clearInterval(quoteTimer);rotate();quoteTimer=setInterval(rotate,12000);haptic(7)});
+  updateClock();homeClockTimer=setInterval(updateClock,1000);quoteTimer=setInterval(rotate,10*60*1000);
+  $('#nextQuote')?.addEventListener('click',()=>{clearInterval(quoteTimer);rotate();quoteTimer=setInterval(rotate,10*60*1000);haptic(7)});
 }
 function completeToday(){
   const k=todayISO();if(state.completedDays[k])return toast('כבר סימנת את המשימה להיום');state.completedDays[k]=true;save();haptic(20);confetti();render();toast('המשימה של היום הושלמה ✓');
@@ -659,6 +659,7 @@ $('#sosFloat').onclick=openSOS;$('#themeBtn').onclick=()=>{setTheme(state.theme=
 const viewOrder=['tools','stats','home','journey','settings'];
 $('#view').addEventListener('touchstart',e=>{touchStartX=e.changedTouches[0].clientX;touchStartY=e.changedTouches[0].clientY},{passive:true});
 $('#view').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-touchStartX,dy=e.changedTouches[0].clientY-touchStartY;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.2)return;const i=viewOrder.indexOf(currentView),next=dx>0?Math.min(viewOrder.length-1,i+1):Math.max(0,i-1);if(next!==i)navigate(viewOrder[next],true,dx>0?'from-left':'from-right')},{passive:true});
+advanceQuote();
 render();
 document.addEventListener('visibilitychange',()=>{const cover=$('#privacyCover');if(!cover)return;if(document.hidden&&state.discreet)cover.classList.add('show');else if(!document.hidden)setTimeout(()=>cover.classList.remove('show'),90)});
 window.addEventListener('pagehide',()=>{if(state.discreet)$('#privacyCover')?.classList.add('show')});
