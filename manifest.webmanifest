@@ -4,7 +4,7 @@
   "description":"כלי אישי למעקב, הרגלים, צ'ק-אין והתקדמות.",
   "lang":"he",
   "dir":"rtl",
-  "start_url":"./",
+  "start_url":"./?v=36",
   "scope":"./",
   "display":"standalone",
   "background_color":"#08070d",
