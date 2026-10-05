@@ -566,6 +566,7 @@ function renderAuthBoot(){
  host.innerHTML=`<div class="auth-boot"><div class="auth-boot-ring"></div><b>מחבר את החשבון שלך…</b><span>רק רגע</span></div>`;
 }
 function authGateTemplate(mode='login'){
+<<<<<<< HEAD
  const register=mode==='register',forgot=mode==='forgot',recovery=mode==='recovery';
  if(recovery)return `<div class="auth-copy"><div class="auth-eyebrow">איפוס סיסמה</div><h1>בוחרים סיסמה חדשה.</h1><p>הקישור אומת. הזן סיסמה חדשה לחשבון שלך.</p></div>
  <form class="auth-form" id="recoveryForm">
@@ -581,13 +582,21 @@ function authGateTemplate(mode='login'){
    <button class="primary-btn auth-submit" type="submit" id="forgotSubmit">שלח קישור לאיפוס</button>
  </form>
  <button class="auth-local" data-auth-mode="login">חזרה להתחברות</button>`;
+=======
+ const register=mode==='register';
+>>>>>>> 81e830edc515e27ae3704d2211598f8768f84717
  return `<div class="auth-copy"><div class="auth-eyebrow">${register?'חשבון חדש':'ברוך הבא'}</div><h1>${register?'יוצרים חשבון.':'ממשיכים מאיפה שעצרת.'}</h1><p>${register?'המידע שכבר נמצא במכשיר יתחבר לחשבון ויישמר גם בענן.':'התחבר כדי להחזיר את הנתונים שלך ולסנכרן אותם בין מכשירים.'}</p></div>
  <div class="auth-tabs"><button type="button" class="${!register?'active':''}" data-auth-mode="login">התחברות</button><button type="button" class="${register?'active':''}" data-auth-mode="register">הרשמה</button></div>
  <form class="auth-form" id="authGateForm">
    ${register?'<label><span>שם</span><input id="gateName" type="text" autocomplete="name" placeholder="איך לקרוא לך?"></label>':''}
+<<<<<<< HEAD
    <label><span>אימייל</span><input id="gateEmail" type="email" autocomplete="email" placeholder="name@example.com" required></label>
    <label><span>סיסמה</span><input id="gatePassword" type="password" autocomplete="${register?'new-password':'current-password'}" minlength="8" placeholder="לפחות 8 תווים" required></label>
    ${!register?'<button class="auth-forgot" type="button" data-auth-mode="forgot">שכחתי סיסמה</button>':''}
+=======
+   <label><span>אימייל</span><input id="gateEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" required></label>
+   <label><span>סיסמה</span><input id="gatePassword" type="password" autocomplete="${register?'new-password':'current-password'}" minlength="8" placeholder="לפחות 8 תווים" required></label>
+>>>>>>> 81e830edc515e27ae3704d2211598f8768f84717
    <div class="auth-error" id="authGateError"></div>
    <button class="primary-btn auth-submit" type="submit" id="authGateSubmit">${register?'צור חשבון והמשך':'התחבר והמשך'}</button>
  </form>
@@ -597,6 +606,7 @@ function authGateTemplate(mode='login'){
 function renderAuthGate(mode='login'){
  const host=$('#authGateBody');if(!host)return;
  host.innerHTML=authGateTemplate(mode);
+<<<<<<< HEAD
  if(mode==='recovery'){
    $('#recoveryForm',host).onsubmit=async e=>{
      e.preventDefault();
@@ -629,6 +639,8 @@ function renderAuthGate(mode='login'){
    };
    return;
  }
+=======
+>>>>>>> 81e830edc515e27ae3704d2211598f8768f84717
  $('#continueLocalBtn',host).onclick=()=>{setAuthGateVisible(false);localStorage.setItem('reset90-auth-local-ok','1')};
  $('#authGateForm',host).onsubmit=async e=>{
    e.preventDefault();
@@ -644,9 +656,16 @@ function renderAuthGate(mode='login'){
      localStorage.removeItem('reset90-auth-local-ok');
      localStorage.setItem('reset90-auth-signed-in','1');
      setAuthGateVisible(false);
+<<<<<<< HEAD
      toast(register?'החשבון נוצר והנתונים סונכרנו':'התחברת והנתונים סונכרנו');
    }catch(ex){
      err.textContent=ex.message||'הפעולה נכשלה';
+=======
+     render();
+     toast(register?'החשבון נוצר והנתונים סונכרנו':'התחברת והנתונים סונכרנו');
+   }catch(error){
+     err.textContent=error.message||'הפעולה נכשלה';
+>>>>>>> 81e830edc515e27ae3704d2211598f8768f84717
      btn.disabled=false;btn.textContent=register?'צור חשבון והמשך':'התחבר והמשך';
    }
  };
@@ -659,6 +678,7 @@ async function initDedicatedAuth(){
    authHost.addEventListener('click',e=>{
      const tab=e.target.closest('[data-auth-mode]');
      if(!tab||!authHost.contains(tab))return;
+<<<<<<< HEAD
      e.preventDefault();e.stopPropagation();renderAuthGate(tab.dataset.authMode);
    });
  }
@@ -671,12 +691,24 @@ async function initDedicatedAuth(){
    if(choseLocal||wasSignedIn)setAuthGateVisible(false);
    else{renderAuthGate('login');setAuthGateVisible(true)}
  }
+=======
+     e.preventDefault();
+     e.stopPropagation();
+     renderAuthGate(tab.dataset.authMode);
+   });
+ }
+ const choseLocal=localStorage.getItem('reset90-auth-local-ok')==='1';
+ const wasSignedIn=localStorage.getItem('reset90-auth-signed-in')==='1';
+ if(choseLocal){setAuthGateVisible(false)}
+ else{renderAuthBoot();setAuthGateVisible(true)}
+>>>>>>> 81e830edc515e27ae3704d2211598f8768f84717
  const snap=await window.FocusCloud?.init?.({
    getState:()=>state,
    applyState:(incoming)=>{
      state={...freshState(),...(incoming||{})};
      localStorage.setItem(KEY,JSON.stringify(state));
      currentView=state.currentView||currentView||'home';
+<<<<<<< HEAD
      setTheme(state.theme||'dark');applyDiscreetMode();render();
    }
  });
@@ -690,6 +722,27 @@ async function initDedicatedAuth(){
  if(wasSignedIn){
    localStorage.removeItem('reset90-auth-signed-in');
    if(!choseLocal){renderAuthGate('login');setAuthGateVisible(true)}
+=======
+     setTheme(state.theme||'dark');
+     applyDiscreetMode();
+     render();
+   }
+ });
+ if(snap?.user){
+   localStorage.setItem('reset90-auth-signed-in','1');
+   localStorage.removeItem('reset90-auth-local-ok');
+   setAuthGateVisible(false);
+   return;
+ }
+ if(wasSignedIn && snap?.ready===false){
+   setAuthGateVisible(false);
+   return;
+ }
+ localStorage.removeItem('reset90-auth-signed-in');
+ if(!choseLocal){
+   renderAuthGate('login');
+   setAuthGateVisible(true);
+>>>>>>> 81e830edc515e27ae3704d2211598f8768f84717
  }
 }
 
@@ -1020,4 +1073,8 @@ initDedicatedAuth();
 document.addEventListener('visibilitychange',()=>{const cover=$('#privacyCover');if(!cover)return;if(document.hidden&&state.discreet)cover.classList.add('show');else if(!document.hidden)setTimeout(()=>cover.classList.remove('show'),90)});
 window.addEventListener('pagehide',()=>{if(state.discreet)$('#privacyCover')?.classList.add('show')});
 window.addEventListener('pageshow',()=>$('#privacyCover')?.classList.remove('show'));
+<<<<<<< HEAD
 if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=40',{updateViaCache:'none'});await reg.update()}catch{}});
+=======
+if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=36',{updateViaCache:'none'});await reg.update()}catch{}});
+>>>>>>> 81e830edc515e27ae3704d2211598f8768f84717
