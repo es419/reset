@@ -312,7 +312,6 @@
     }
   }
 
-<<<<<<< HEAD
   async function requestPasswordReset(email) {
     if (!(await ensureSdk())) throw new Error('Appwrite SDK לא זמין');
     const cleanEmail = String(email || '').trim();
@@ -338,8 +337,6 @@
     }
   }
 
-=======
->>>>>>> 81e830edc515e27ae3704d2211598f8768f84717
   async function register(email, password, name = '') {
     if (!(await ensureSdk())) throw new Error('Appwrite SDK לא זמין');
     setCloudStatus('connecting');
@@ -386,11 +383,7 @@
     const meta = readMeta();
     cloudState.lastSyncAt = meta.lastSyncAt || null;
     const user = await refreshUser();
-<<<<<<< HEAD
     if (user) syncInitial();
-=======
-    if (user) await syncInitial();
->>>>>>> 81e830edc515e27ae3704d2211598f8768f84717
 
     window.addEventListener('online', () => {
       if (currentUser) syncInitial();
@@ -405,11 +398,8 @@
     snapshot,
     login,
     register,
-<<<<<<< HEAD
     requestPasswordReset,
     completePasswordReset,
-=======
->>>>>>> 81e830edc515e27ae3704d2211598f8768f84717
     logout,
     syncNow,
     scheduleSync,
